@@ -5,10 +5,15 @@ import { X } from "lucide-react";
 
 import type { CalorieTier, StatusDelta } from "@/types/action";
 import type { Character } from "@/types/character";
-import { FOODS } from "@/lib/game/constants";
+import { FOODS, LIFE_STAGES } from "@/lib/game/constants";
+import { isStageUnlocked } from "@/lib/game/gating";
 import { useGameStore } from "@/lib/store/useGameStore";
 import { cn, formatDuration } from "@/lib/utils";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
+
+function stageLabel(stage: (typeof LIFE_STAGES)[number]["stage"]): string {
+  return LIFE_STAGES.find((s) => s.stage === stage)?.label ?? stage;
+}
 
 function effectHint(status?: StatusDelta): string {
   if (!status) return "";
@@ -104,28 +109,44 @@ export function FoodSelector({
             <div className="grid max-h-[58vh] grid-cols-2 gap-2.5 overflow-y-auto pr-0.5">
               {FOODS.map((f) => {
                 const cal = CALORIE_META[f.calorieTier];
+                const locked = !isStageUnlocked(f.minStage, character.lifeStage);
                 return (
                   <button
                     key={f.key}
                     type="button"
+                    disabled={locked}
                     onClick={() => {
+                      if (locked) return;
                       feed(f.key);
                       setOpen(false);
                     }}
-                    className="toy-btn flex flex-col items-start gap-1 bg-white"
+                    className={cn(
+                      "toy-btn flex flex-col items-start gap-1",
+                      locked ? "bg-black/[0.04]" : "bg-white",
+                    )}
                   >
                     <div className="flex w-full items-center justify-between">
-                      <span className="text-ink">
+                      <span className={cn("text-ink", locked && "opacity-35")}>
                         <PixelIcon name={f.key} size={24} />
                       </span>
-                      <span className={cn("pill", cal.cls)}>{cal.label}</span>
+                      {locked ? (
+                        <span className="text-ink/45">
+                          <PixelIcon name="lock" size={15} />
+                        </span>
+                      ) : (
+                        <span className={cn("pill", cal.cls)}>{cal.label}</span>
+                      )}
                     </div>
-                    <span className="text-sm font-bold">
+                    <span className={cn("text-sm font-bold", locked && "text-ink/45")}>
                       {f.label}
-                      {f.junk && <span className="ml-1 text-[10px] text-coral">불량식품</span>}
+                      {!locked && f.junk && (
+                        <span className="ml-1 text-[10px] text-coral">불량식품</span>
+                      )}
                     </span>
                     <span className="font-sans text-[10px] font-medium leading-tight text-ink/55">
-                      {effectHint(f.effect.status)}
+                      {locked
+                        ? `${stageLabel(f.minStage!)}부터`
+                        : effectHint(f.effect.status)}
                     </span>
                   </button>
                 );

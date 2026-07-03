@@ -113,10 +113,22 @@ export function expForLevel(level: number): number {
 
 export const FOODS: FoodDef[] = [
   {
+    key: "formula",
+    label: "분유",
+    emoji: "🍼",
+    calorieTier: "low",
+    effect: {
+      status: { hunger: 35, health: 4, mood: 3, weight: 0.15 },
+      exp: 4,
+      message: "분유를 다 먹었어요. 무럭무럭 자라요!",
+    },
+  },
+  {
     key: "homeMeal",
     label: "집밥",
     emoji: "🍚",
     calorieTier: "medium",
+    minStage: "child",
     effect: {
       status: { hunger: 40, health: 5, weight: 0.2 },
       exp: 4,
@@ -128,6 +140,7 @@ export const FOODS: FoodDef[] = [
     label: "급식/학식",
     emoji: "🍱",
     calorieTier: "medium",
+    minStage: "child",
     effect: {
       status: { hunger: 35, weight: 0.2 },
       exp: 4,
@@ -139,6 +152,7 @@ export const FOODS: FoodDef[] = [
     label: "편의점",
     emoji: "🍙",
     calorieTier: "medium",
+    minStage: "child",
     effect: {
       status: { hunger: 25, mood: 3, health: -1, weight: 0.1 },
       exp: 4,
@@ -151,6 +165,7 @@ export const FOODS: FoodDef[] = [
     emoji: "🍔",
     calorieTier: "high",
     junk: true,
+    minStage: "child",
     effect: {
       status: { hunger: 40, mood: 10, health: -3, weight: 0.6 },
       exp: 4,
@@ -163,6 +178,7 @@ export const FOODS: FoodDef[] = [
     emoji: "🍜",
     calorieTier: "high",
     junk: true,
+    minStage: "child",
     effect: {
       status: { hunger: 38, mood: 6, health: -2, weight: 0.5, stress: -2 },
       exp: 4,
@@ -175,6 +191,7 @@ export const FOODS: FoodDef[] = [
     emoji: "🍗",
     calorieTier: "high",
     junk: true,
+    minStage: "child",
     effect: {
       status: { hunger: 35, mood: 12, health: -3, weight: 0.55 },
       exp: 4,
@@ -187,6 +204,7 @@ export const FOODS: FoodDef[] = [
     emoji: "🌶️",
     calorieTier: "high",
     junk: true,
+    minStage: "child",
     effect: {
       status: { hunger: 30, mood: 9, health: -2, weight: 0.45, stress: -3 },
       exp: 4,
@@ -198,6 +216,7 @@ export const FOODS: FoodDef[] = [
     label: "삼겹살",
     emoji: "🥓",
     calorieTier: "high",
+    minStage: "child",
     effect: {
       status: { hunger: 42, health: 2, mood: 6, weight: 0.5 },
       exp: 4,
@@ -209,6 +228,7 @@ export const FOODS: FoodDef[] = [
     label: "닭가슴살",
     emoji: "🍖",
     calorieTier: "low",
+    minStage: "child",
     effect: {
       status: { hunger: 18, health: 4, weight: 0.02 },
       stats: { strength: 0.3 },
@@ -221,6 +241,7 @@ export const FOODS: FoodDef[] = [
     label: "샐러드",
     emoji: "🥗",
     calorieTier: "low",
+    minStage: "child",
     effect: {
       status: { hunger: 20, health: 5, weight: 0.05 },
       exp: 4,
@@ -232,6 +253,7 @@ export const FOODS: FoodDef[] = [
     label: "과일",
     emoji: "🍎",
     calorieTier: "low",
+    minStage: "child",
     effect: {
       status: { hunger: 15, health: 3, mood: 2, weight: 0.03 },
       exp: 4,
@@ -243,6 +265,7 @@ export const FOODS: FoodDef[] = [
     label: "삶은 계란",
     emoji: "🥚",
     calorieTier: "low",
+    minStage: "child",
     effect: {
       status: { hunger: 12, health: 2, weight: 0.03 },
       stats: { strength: 0.15 },
@@ -256,6 +279,7 @@ export const FOODS: FoodDef[] = [
     emoji: "☕",
     calorieTier: "low",
     isDrink: true,
+    minStage: "child",
     effect: {
       status: { focus: 15, stress: 3, sleepQuality: -5 },
       exp: 4,
@@ -269,6 +293,7 @@ export const FOODS: FoodDef[] = [
     calorieTier: "medium",
     junk: true,
     isDrink: true,
+    minStage: "child",
     effect: {
       status: { focus: 18, stress: 5, sleepQuality: -9, health: -1, weight: 0.1, mood: 3 },
       exp: 4,

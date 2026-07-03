@@ -125,6 +125,16 @@ export const PIXEL_ICONS: Record<string, string[]> = {
   ],
 
   // --- 음식 ---
+  formula: [
+    "..xx....",
+    ".xxxx...",
+    ".xxxx...",
+    "xxxxxx..",
+    "xxxxxx..",
+    "xxxxxx..",
+    "xxxxxx..",
+    "........",
+  ],
   homeMeal: [
     "........",
     "........",

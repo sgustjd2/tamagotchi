@@ -44,7 +44,7 @@ import {
   OVEREAT_HUNGER_THRESHOLD,
 } from "@/lib/game/constants";
 import { applyEffect, isActionReady, setCooldown } from "@/lib/game/engine";
-import { isActionUnlocked } from "@/lib/game/gating";
+import { isActionUnlocked, isStageUnlocked } from "@/lib/game/gating";
 import {
   rollOutcome,
   scaleStatsDelta,
@@ -323,6 +323,9 @@ export const useGameStore = create<GameState>()(
         }
         const food = FOODS.find((f) => f.key === foodKey);
         if (!food) return { ok: false, message: "알 수 없는 음식이에요." };
+        if (!isStageUnlocked(food.minStage, c.lifeStage)) {
+          return { ok: false, message: "아직 먹을 수 없는 음식이에요." };
+        }
 
         let next = applyEffect(c, food.effect);
         let shownEffect = food.effect; // 토스트에 보여줄 실제 적용 효과

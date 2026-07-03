@@ -44,5 +44,7 @@ export interface FoodDef {
   junk?: boolean;
   /** 식사가 아닌 음료(커피·에너지드링크 등) — 연간 "식사" 카운터에서 제외 */
   isDrink?: boolean;
+  /** 이 단계부터 먹을 수 있음(없으면 항상 가능) — 아기 단계엔 분유만 허용 */
+  minStage?: LifeStage;
   effect: ActionEffect; // status delta + message
 }
