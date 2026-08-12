@@ -52,7 +52,7 @@ export function familyCoreAvg(c: Character, family: JobFamilyKey): number {
 export function familyFitBonus(c: Character, family: JobFamilyKey | null): number {
   if (!family) return 0;
   const diff = familyCoreAvg(c, family) - JOB_FAMILIES[family].statBar;
-  return clamp(Math.round(diff * 0.8), -40, 22);
+  return clamp(Math.round(diff * 0.8), -15, 22);
 }
 
 export type FamilyFit = "good" | "ok" | "hard";
@@ -76,7 +76,7 @@ export function employmentReadiness(
 /** 직군 등급(레어도)에 따른 합격 확률 페널티 — 높은 등급일수록 취업이 어렵다 */
 export function rarityHiringMod(family: JobFamilyKey | null): number {
   if (!family) return 0;
-  return -5 * RARITY_META[JOB_FAMILIES[family].rarity].order; // 일반 0 ~ 전설 -20
+  return -3 * RARITY_META[JOB_FAMILIES[family].rarity].order; // 일반 0 ~ 전설 -12
 }
 
 /**
@@ -102,9 +102,10 @@ export function employmentChance(
       heightFitMod(c, family) +
       degreeHiringMod(c) +
       universityHiringMod(c) +
-      COMPANY_TYPES[company].chanceMod,
-    5,
-    95,
+      COMPANY_TYPES[company].chanceMod +
+      (family ? JOB_FAMILIES[family].hireMod : 0),
+    15,
+    92,
   );
 }
 

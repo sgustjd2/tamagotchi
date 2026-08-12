@@ -8,6 +8,7 @@ import {
 } from "@/lib/game/weight";
 import { HEALTHY_WEIGHT } from "@/lib/game/constants";
 import { createCharacter } from "@/lib/game/character";
+import { applyDecay } from "@/lib/game/status";
 import type { Character } from "@/types/character";
 
 /** 원하는 몸무게/나이를 가진 캐릭터 생성 헬퍼 */
@@ -85,5 +86,61 @@ describe("weightEfficiencyMultiplier", () => {
     expect(weightEfficiencyMultiplier(charWithWeight(70, 20))).toBe(1);
     expect(weightEfficiencyMultiplier(charWithWeight(90, 20))).toBe(0.9);
     expect(weightEfficiencyMultiplier(charWithWeight(40, 20))).toBe(0.9);
+  });
+});
+
+describe("applyDecay 평균 체중 자연 성장(따라잡기)", () => {
+  const HOUR = 60 * 60 * 1000;
+  const GAME_YEAR_MS = 9 * 60 * 1000;
+
+  it("키처럼 나이대 평균 체중까지 시간에 비례해 따라잡는다", () => {
+    const now = Date.now();
+    const bornAt = now - 9 * GAME_YEAR_MS; // 9살 → elementary(25~45kg), 평균 35kg
+    const c: Character = {
+      ...createCharacter("user1", "테스트", "blush", "male", bornAt),
+      bornAt,
+      lastTickAt: now - 2 * HOUR,
+      lastExerciseAt: bornAt,
+      status: { ...createCharacter("user1", "테스트", "blush", "male", bornAt).status, weight: 10 },
+    };
+
+    const next = applyDecay(c, now);
+    expect(next.ageYears).toBe(9);
+    expect(next.status.weight).toBeCloseTo(35); // elementary 평균 체중까지 따라잡음
+  });
+
+  it("평균 이상이면 그대로 유지된다(평균으로 끌어내리지 않음, 식사/운동에만 좌우)", () => {
+    const now = Date.now();
+    const bornAt = now - 9 * GAME_YEAR_MS; // elementary 평균 35kg
+    const c: Character = {
+      ...createCharacter("user1", "테스트", "blush", "male", bornAt),
+      bornAt,
+      lastTickAt: now - 2 * HOUR,
+      lastExerciseAt: now, // 방금 운동함 → 미운동 체중 증가 로직 배제
+      status: { ...createCharacter("user1", "테스트", "blush", "male", bornAt).status, weight: 40 },
+    };
+
+    const next = applyDecay(c, now);
+    expect(next.status.weight).toBe(40);
+  });
+
+  it("한 틱 안에서 성장 단계가 바뀌면(오프라인 점프) 새 나이의 평균 체중을 기준으로 따라잡는다", () => {
+    // 이전엔 next.ageYears(틱 이후 갱신 전의 옛 나이)를 기준으로 평균 체중을 계산해서
+    // 성장 단계가 바뀌는 순간의 틱에서 옛 단계 기준값을 쓰는 버그가 있었다.
+    const now = Date.now();
+    const bornAt = now - 9 * GAME_YEAR_MS; // 지금 나이 9살(elementary, 평균 35kg)
+    const c: Character = {
+      ...createCharacter("user1", "테스트", "blush", "male", bornAt),
+      bornAt,
+      ageYears: 7, // 직전에 기록된 나이(child, 평균 22.5kg) — 이 틱에서 9살로 갱신됨
+      lifeStage: "child",
+      lastTickAt: now - 2 * HOUR,
+      lastExerciseAt: bornAt,
+      status: { ...createCharacter("user1", "테스트", "blush", "male", bornAt).status, weight: 14 },
+    };
+
+    const next = applyDecay(c, now);
+    expect(next.ageYears).toBe(9);
+    expect(next.status.weight).toBeCloseTo(35); // 22.5(옛 단계)가 아니라 35(새 단계)로 따라잡음
   });
 });

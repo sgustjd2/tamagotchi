@@ -209,7 +209,7 @@ export const ACTIONS: ActionDef[] = [
     cooldownMs: 8 * HOUR,
     category: "rest",
     effect: () => ({
-      status: { energy: 60, sleepQuality: 45, stress: -12, health: 3, focus: 10 },
+      status: { energy: 60, sleepQuality: 45, stress: -18, health: 3, focus: 10 },
       exp: 4,
       message: "푹 잤어요. 컨디션 최상!",
     }),
@@ -227,7 +227,7 @@ export const ACTIONS: ActionDef[] = [
     minStage: "jobseeker",
     effect: () => ({
       status: { confidence: 2, stress: 1 },
-      stats: { portfolioScore: 6, communication: 0.3 },
+      stats: { portfolioScore: 9, communication: 0.5, employability: 0.5 },
       exp: 8,
       message: "이력서를 다듬었어요.",
     }),
@@ -243,7 +243,7 @@ export const ACTIONS: ActionDef[] = [
     minStage: "jobseeker",
     effect: () => ({
       status: { energy: -8, stress: 3, focus: -3 },
-      stats: { portfolioScore: 8, creativity: 0.8, careerPotential: 0.5 },
+      stats: { portfolioScore: 13, creativity: 0.8, careerPotential: 0.5, employability: 0.8 },
       exp: 12,
       message: "포트폴리오를 끌어올렸어요.",
     }),
@@ -259,7 +259,7 @@ export const ACTIONS: ActionDef[] = [
     minStage: "jobseeker",
     effect: () => ({
       status: { confidence: 3, stress: 2, energy: -5 },
-      stats: { interviewScore: 8, communication: 0.8 },
+      stats: { interviewScore: 12, communication: 0.8, employability: 0.5 },
       exp: 10,
       message: "면접 연습으로 자신감이 붙었어요.",
     }),
@@ -275,7 +275,7 @@ export const ACTIONS: ActionDef[] = [
     minStage: "jobseeker",
     effect: () => ({
       status: { focus: 3, stress: 2, energy: -6 },
-      stats: { certificateScore: 9, academic: 0.6, intelligence: 0.4, employability: 0.5 },
+      stats: { certificateScore: 13, academic: 0.6, intelligence: 0.4, employability: 0.8 },
       exp: 11,
       message: "자격증 공부로 스펙을 쌓았어요.",
     }),
@@ -324,7 +324,7 @@ export const ACTIONS: ActionDef[] = [
     category: "selfdev",
     minStage: "employee",
     effect: () => ({
-      status: { energy: -6, mood: 2, stress: 1 },
+      status: { energy: -6, mood: 2, stress: 1, confidence: 2 },
       stats: { communication: 1, careerPotential: 0.3 },
       exp: 8,
       message: "회의에서 의견을 나눴어요.",
@@ -356,7 +356,7 @@ export const ACTIONS: ActionDef[] = [
     category: "selfdev",
     minStage: "employee",
     effect: () => ({
-      status: { energy: -5, stress: 2 },
+      status: { energy: -5, stress: 2, confidence: 2 },
       stats: { careerPotential: 2, discipline: 1 },
       exp: 10,
       message: "자기개발에 투자했어요.",
@@ -372,7 +372,7 @@ export const ACTIONS: ActionDef[] = [
     category: "rest",
     minStage: "employee",
     effect: () => ({
-      status: { energy: 18, stress: -12, burnout: -10, mood: 4 },
+      status: { energy: 18, stress: -20, burnout: -10, mood: 4 },
       exp: 2,
       message: "잠시 쉬며 한숨 돌렸어요.",
     }),

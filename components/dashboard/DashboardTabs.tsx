@@ -8,7 +8,6 @@ import { PixelIcon } from "@/components/pixel/PixelIcon";
 import { ActionGrid } from "@/components/actions/ActionGrid";
 import { FoodSelector } from "@/components/actions/FoodSelector";
 import { StudyCard } from "@/components/actions/StudyCard";
-import { StatusPanel } from "@/components/character/StatusPanel";
 import { StatsPanel } from "@/components/character/StatsPanel";
 import { WeightCard } from "@/components/character/WeightCard";
 import { CareerCard } from "@/components/dashboard/CareerCard";
@@ -79,7 +78,6 @@ export function DashboardTabs({
           <ActionGrid character={character} now={now} />
         </div>
         <div className={panelCls("status")}>
-          <StatusPanel character={character} />
           <WeightCard character={character} />
           <CareerCard character={character} />
           <StatsPanel character={character} />

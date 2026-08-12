@@ -9,6 +9,7 @@ import { CharacterPreviewCard } from "@/components/character/CharacterPreviewCar
 import { MASCOT_COLORS } from "@/lib/game/constants";
 import { DEFAULT_APPEARANCE } from "@/lib/game/sprite/characterStageConfig";
 import { rollAppearance } from "@/lib/game/sprite/characterAppearance";
+import { paletteForColor } from "@/lib/game/sprite/characterPalettes";
 import { useGameStore } from "@/lib/store/useGameStore";
 import { cn } from "@/lib/utils";
 
@@ -109,6 +110,7 @@ export default function CreatePage() {
             status={PREVIEW_STATUS}
             gender={gender}
             appearance={appearance}
+            palette={paletteForColor(color, "normal")}
             width={220}
           />
         </div>

@@ -16,8 +16,8 @@ export const GAME_YEAR_MS: number = (() => {
   return Number.isFinite(fromEnv) && fromEnv > 0 ? fromEnv : 9 * 60 * 1000;
 })();
 
-/** 연간 생활비(만원) — 저축 = 연봉 - 생활비 */
-export const LIVING_COST = 2000;
+/** 연간 생활비(만원) — 저축 = 연봉 - 생활비. 하위 직종도 의미있는 저축이 가능하도록 조정 */
+export const LIVING_COST = 1200;
 
 /** 자연사 한계 나이(이 나이엔 사망 확률 100%). 60세 = 9분/년 × 60 = 약 9시간 한 판 */
 export const MAX_AGE = 60;
@@ -41,13 +41,13 @@ export const WEIGHT_MAX = 120;
 // ---------------------------------------------------------------------------
 
 export const DECAY_PER_HOUR = {
-  hunger: -7,
+  hunger: -10,
   energy: -4,
   mood: -3,
   focus: -5,
   cleanliness: -4,
   sleepQuality: -3,
-  stress: +2,
+  stress: +1,
   // 자신감도 서서히 줄어 칭찬/성취로 관리하는 스탯이 되게 한다(다른 감소보다 완만)
   confidence: -0.8,
 } as const;
@@ -55,6 +55,13 @@ export const DECAY_PER_HOUR = {
 /** 마지막 운동 후 이 시간이 지나면 시간당 체중이 조금씩 증가 */
 export const NO_EXERCISE_THRESHOLD_MS = 18 * HOUR;
 export const WEIGHT_GAIN_NO_EXERCISE_PER_HOUR = 0.08;
+
+/**
+ * 저체중일 때 나이대 최소 체중까지 자연스럽게 따라잡는 속도(시간당 남은 차이의 비율).
+ * 키는 나이만으로 자동 성장하는데 몸무게는 액션(식사/운동)에만 의존해서, 성장 단계가
+ * 바뀔 때마다(예: 유아 진입 시 최소 15kg) 못 따라가고 만성 저체중이 되는 문제 보정.
+ */
+export const WEIGHT_CATCHUP_RATE_PER_HOUR = 1.2;
 
 // ---------------------------------------------------------------------------
 // 성장 단계 (게임 나이 기준)
@@ -342,8 +349,12 @@ export const YEARLY_TARGETS = {
 /** 오프라인 다년 방치 시 페널티 적용 상한 연수 */
 export const MAX_NEGLECT_YEARS_APPLIED = 3;
 
-/** 이 시간(ms) 이상 앱을 열지 않으면 방치 사망 처리 */
-export const NEGLECT_DEATH_MS = 8 * 60 * 60 * 1000; // 현실 8시간
+/**
+ * 이 시간(ms) 이상 앱을 열지 않으면 방치 사망 처리.
+ * 배고픔(초기 70) 기준: DECAY_PER_HOUR.hunger(-7) × DECAY_SCALE(3) = 21/h
+ * → 70/21 ≈ 3.33시간에 배고픔 0. 약간 여유를 줘 4시간으로 설정.
+ */
+export const NEGLECT_DEATH_MS = 4 * 60 * 60 * 1000; // 현실 4시간 (배고픔 0 기준)
 
 /** 시험이 발생하는 학업 단계 */
 export const EDU_STAGES: LifeStage[] = [

@@ -5,10 +5,11 @@ import {
   DECAY_SCALE,
   MAX_AGE,
   NO_EXERCISE_THRESHOLD_MS,
+  WEIGHT_CATCHUP_RATE_PER_HOUR,
   WEIGHT_GAIN_NO_EXERCISE_PER_HOUR,
 } from "./constants";
 import { ageFromBornAt, cappedStageForAge } from "./growth";
-import { weightTickPenalty } from "./weight";
+import { averageWeightForAge, weightTickPenalty } from "./weight";
 
 /**
  * 시간 경과에 따른 상태 변화를 적용한다. (서버/클라이언트 공용 순수 함수)
@@ -23,6 +24,13 @@ export function applyDecay(c: Character, now: number): Character {
     status: { ...c.status },
     stats: { ...c.stats },
   };
+
+  // 나이/단계는 시간 경과와 무관하게 항상 최신값 — 아래 몸무게 계산도 이 나이를 써야
+  // 한다(생일이 막 지난 틱에서 이전 나이 기준으로 계산되는 걸 방지).
+  // 자연사 한계(60세)를 넘는 오프라인 점프에서도 나이는 60에 캡 → 수명·엔딩 표기 일관성
+  const age = Math.min(ageFromBornAt(c.bornAt, now), MAX_AGE);
+  next.ageYears = age;
+  next.lifeStage = cappedStageForAge(age, c.job != null);
 
   if (hours > 0) {
     const s = next.status;
@@ -61,8 +69,18 @@ export function applyDecay(c: Character, now: number): Character {
       s.weight += WEIGHT_GAIN_NO_EXERCISE_PER_HOUR * hours;
     }
 
+    // 키는 나이만으로 자동 성장하는데 몸무게는 액션에만 의존하면 성장 단계가
+    // 바뀔 때마다(적정 체중이 훌쩍 뛸 때마다) 못 따라가고 만성 저체중이 된다.
+    // 나이대 "평균 체중"을 자연 성장 기준점으로 삼아 그 아래면 서서히 따라잡고,
+    // 평균 이상은 순전히 식사/운동(먹은 음식·활동)에 따라 갈린다.
+    const avg = averageWeightForAge(age);
+    if (s.weight < avg) {
+      const gap = avg - s.weight;
+      s.weight += Math.min(gap, gap * WEIGHT_CATCHUP_RATE_PER_HOUR * dh);
+    }
+
     // 몸무게 페널티
-    const wp = weightTickPenalty(s.weight, next.ageYears, hours);
+    const wp = weightTickPenalty(s.weight, age, hours);
     s.health += wp.health;
     s.focus += wp.focus;
     s.energy += wp.energy;
@@ -70,13 +88,6 @@ export function applyDecay(c: Character, now: number): Character {
     next.status = clampStatus(s);
     next.lastTickAt = now;
   }
-
-  // 나이/단계 갱신 (시간 경과와 무관하게 항상 최신화)
-  // employee 이상은 취업(job 보유) 했을 때만 진입 — 미취업이면 jobseeker 로 캡
-  // 자연사 한계(60세)를 넘는 오프라인 점프에서도 나이는 60에 캡 → 수명·엔딩 표기 일관성
-  const age = Math.min(ageFromBornAt(c.bornAt, now), MAX_AGE);
-  next.ageYears = age;
-  next.lifeStage = cappedStageForAge(age, c.job != null);
 
   return next;
 }

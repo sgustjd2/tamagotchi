@@ -9,6 +9,7 @@ import type {
 } from "@/types/character";
 import { PixelRoom } from "@/components/game/PixelRoom";
 import { PixelCharacter } from "@/components/game/PixelCharacter";
+import type { PixelPalette } from "@/lib/game/sprite/characterPalettes";
 import { jobTypeFromFamily } from "@/lib/game/sprite/characterVisualState";
 
 /** 대시보드 밖(생성 화면·랜딩·엔딩)에서도 실제 캐릭터와 같은 모습을 보여주는 미리보기 카드 */
@@ -18,6 +19,7 @@ export function CharacterPreviewCard({
   gender,
   jobFamily,
   appearance,
+  palette,
   width = 220,
   charSize,
   className,
@@ -27,6 +29,7 @@ export function CharacterPreviewCard({
   gender?: Gender;
   jobFamily?: JobFamilyKey;
   appearance?: CharacterAppearance;
+  palette?: PixelPalette;
   width?: number;
   charSize?: number;
   className?: string;
@@ -45,6 +48,7 @@ export function CharacterPreviewCard({
         jobType={jobType}
         gender={gender}
         appearance={appearance}
+        palette={palette}
         size={charSize ?? Math.round(width * 0.52)}
       />
     </PixelRoom>

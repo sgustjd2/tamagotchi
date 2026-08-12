@@ -108,16 +108,22 @@ export default function DashboardPage() {
         <div className="flex min-h-0 shrink-0 flex-col md:col-span-2">
           <div className="card flex min-h-0 flex-col items-center overflow-y-auto p-3 md:flex-1 md:p-5">
             <CharacterAvatar character={character} />
-            {/* 상시 핵심 컨디션 — 탭을 오가지 않아도 케어 판단이 가능하게 */}
-            <div className="mt-2 grid w-full max-w-[300px] shrink-0 grid-cols-2 gap-x-4 gap-y-1">
+            {/* 상시 컨디션 — 탭을 오가지 않아도 케어 판단이 가능하게, 전체 지표를 여기 한 곳에 */}
+            <div className="mt-2 grid w-full max-w-[300px] shrink-0 grid-cols-2 gap-x-4 gap-y-1.5">
               <StatBar label="배고픔" value={character.status.hunger} />
               <StatBar label="체력" value={character.status.energy} />
               <StatBar label="기분" value={character.status.mood} />
+              <StatBar label="건강" value={character.status.health} />
+              <StatBar label="집중력" value={character.status.focus} />
+              <StatBar label="청결" value={character.status.cleanliness} />
+              <StatBar label="수면 질" value={character.status.sleepQuality} />
+              <StatBar label="자신감" value={character.status.confidence} />
               <StatBar
                 label="스트레스"
                 value={character.status.stress}
                 higherIsBetter={false}
               />
+              <StatBar label="번아웃" value={character.status.burnout} higherIsBetter={false} />
             </div>
           </div>
         </div>

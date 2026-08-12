@@ -8,6 +8,12 @@ export function healthyRangeForAge(age: number): [number, number] {
   return HEALTHY_WEIGHT[stageForAge(age)];
 }
 
+/** 나이대 적정 범위의 중간값 — 자연 성장이 향하는 "평균 몸무게" 기준점 */
+export function averageWeightForAge(age: number): number {
+  const [lo, hi] = healthyRangeForAge(age);
+  return (lo + hi) / 2;
+}
+
 export function weightVerdict(weight: number, age: number): WeightVerdict {
   const [lo, hi] = healthyRangeForAge(age);
   if (weight < lo) return "low";

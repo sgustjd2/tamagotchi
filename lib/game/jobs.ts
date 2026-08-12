@@ -16,30 +16,31 @@ export interface JobFamily {
   rarity: JobRarity; // 직군 등급(높을수록 합격 확률 페널티 ↑ + 연봉·엔딩 가중) — employment.rarityHiringMod 참조
   riskLevel: number; // 직업 위험도(연간 사고/질병 확률 기여)
   heightBar?: number; // 선호 신장(cm) — 있으면 키가 클수록 합격 유리(employment.heightFitMod)
+  hireMod: number; // 직군 자체 채용 난이도 보정 — 쉬운 직군(+) / 고경쟁 직군(−)
   desc: string;
 }
 
 export const JOB_FAMILIES: Record<JobFamilyKey, JobFamily> = {
   // 전문직·고난이도 (스탯 높아야 붙고, 연봉 높음)
-  medical: { label: "전문직/의료", icon: "heart", coreStats: ["intelligence", "discipline", "memory"], statBar: 75, salaryMult: 1.5, rarity: "legendary", riskLevel: 0.025, desc: "고난이도·고연봉 전문직" },
-  management: { label: "경영/전략", icon: "star", coreStats: ["careerPotential", "intelligence", "communication"], statBar: 62, salaryMult: 1.25, rarity: "epic", riskLevel: 0.018, desc: "기획·전략·리더십" },
-  research: { label: "연구직", icon: "code", coreStats: ["intelligence", "memory", "creativity"], statBar: 65, salaryMult: 1.2, rarity: "epic", riskLevel: 0.012, desc: "연구·실험·논문" },
-  data: { label: "데이터/AI", icon: "chart", coreStats: ["intelligence", "memory", "discipline"], statBar: 62, salaryMult: 1.25, rarity: "epic", riskLevel: 0.01, desc: "통계·모델링·인사이트" },
-  finance: { label: "회계/재무", icon: "coin", coreStats: ["intelligence", "discipline", "memory"], statBar: 60, salaryMult: 1.2, rarity: "rare", riskLevel: 0.012, desc: "회계·재무·정확성" },
-  legal: { label: "법무/컴플라이언스", icon: "resume", coreStats: ["intelligence", "discipline", "memory"], statBar: 60, salaryMult: 1.15, rarity: "rare", riskLevel: 0.01, desc: "법무·규정·정확성" },
-  dev: { label: "개발/IT", icon: "code", coreStats: ["intelligence", "discipline", "creativity"], statBar: 58, salaryMult: 1.2, rarity: "rare", riskLevel: 0.012, desc: "코딩·설계·협업" },
+  medical: { label: "전문직/의료", icon: "heart", coreStats: ["intelligence", "discipline", "memory"], statBar: 75, salaryMult: 1.5, rarity: "legendary", riskLevel: 0.025, hireMod: -5, desc: "고난이도·고연봉 전문직" },
+  management: { label: "경영/전략", icon: "star", coreStats: ["careerPotential", "intelligence", "communication"], statBar: 62, salaryMult: 1.25, rarity: "epic", riskLevel: 0.018, hireMod: -3, desc: "기획·전략·리더십" },
+  research: { label: "연구직", icon: "code", coreStats: ["intelligence", "memory", "creativity"], statBar: 65, salaryMult: 1.2, rarity: "epic", riskLevel: 0.012, hireMod: -3, desc: "연구·실험·논문" },
+  data: { label: "데이터/AI", icon: "chart", coreStats: ["intelligence", "memory", "discipline"], statBar: 62, salaryMult: 1.25, rarity: "epic", riskLevel: 0.01, hireMod: 0, desc: "통계·모델링·인사이트" },
+  finance: { label: "회계/재무", icon: "coin", coreStats: ["intelligence", "discipline", "memory"], statBar: 60, salaryMult: 1.2, rarity: "rare", riskLevel: 0.012, hireMod: 0, desc: "회계·재무·정확성" },
+  legal: { label: "법무/컴플라이언스", icon: "resume", coreStats: ["intelligence", "discipline", "memory"], statBar: 60, salaryMult: 1.15, rarity: "rare", riskLevel: 0.01, hireMod: 0, desc: "법무·규정·정확성" },
+  dev: { label: "개발/IT", icon: "code", coreStats: ["intelligence", "discipline", "creativity"], statBar: 58, salaryMult: 1.2, rarity: "rare", riskLevel: 0.012, hireMod: 0, desc: "코딩·설계·협업" },
   // 중간 난이도
-  pm: { label: "기획/PM", icon: "star", coreStats: ["careerPotential", "communication", "creativity"], statBar: 50, salaryMult: 1.1, rarity: "uncommon", riskLevel: 0.014, desc: "기획·문서·실행" },
-  civil: { label: "공무원", icon: "briefcase", coreStats: ["discipline", "intelligence"], statBar: 50, salaryMult: 0.95, rarity: "uncommon", riskLevel: 0.006, desc: "안정·정년보장·꾸준함" },
-  marketing: { label: "마케팅/콘텐츠", icon: "chart", coreStats: ["creativity", "communication"], statBar: 45, salaryMult: 1.05, rarity: "uncommon", riskLevel: 0.014, desc: "마케팅·창의·트렌드" },
-  design: { label: "디자인", icon: "palette", coreStats: ["creativity", "intelligence"], statBar: 45, salaryMult: 1.05, rarity: "uncommon", riskLevel: 0.012, desc: "감각·UX·디테일" },
-  hr: { label: "인사/총무", icon: "heart", coreStats: ["communication", "discipline"], statBar: 42, salaryMult: 1.0, rarity: "common", riskLevel: 0.01, desc: "인사·운영·공감" },
+  pm: { label: "기획/PM", icon: "star", coreStats: ["careerPotential", "communication", "creativity"], statBar: 50, salaryMult: 1.1, rarity: "uncommon", riskLevel: 0.014, hireMod: 3, desc: "기획·문서·실행" },
+  civil: { label: "공무원", icon: "briefcase", coreStats: ["discipline", "intelligence"], statBar: 50, salaryMult: 0.95, rarity: "uncommon", riskLevel: 0.006, hireMod: 3, desc: "안정·정년보장·꾸준함" },
+  marketing: { label: "마케팅/콘텐츠", icon: "chart", coreStats: ["creativity", "communication"], statBar: 45, salaryMult: 1.05, rarity: "uncommon", riskLevel: 0.014, hireMod: 5, desc: "마케팅·창의·트렌드" },
+  design: { label: "디자인", icon: "palette", coreStats: ["creativity", "intelligence"], statBar: 45, salaryMult: 1.05, rarity: "uncommon", riskLevel: 0.012, hireMod: 5, desc: "감각·UX·디테일" },
+  hr: { label: "인사/총무", icon: "heart", coreStats: ["communication", "discipline"], statBar: 42, salaryMult: 1.0, rarity: "common", riskLevel: 0.01, hireMod: 8, desc: "인사·운영·공감" },
   // 진입 쉬움 (낮은 스탯도 도전 가능, 연봉 낮음, 일부 위험)
-  production: { label: "생산/품질/구매", icon: "exercise", coreStats: ["discipline", "fitness", "strength"], statBar: 35, salaryMult: 0.95, rarity: "common", riskLevel: 0.05, desc: "공정·품질·현장(위험)" },
-  sales: { label: "영업/영업관리", icon: "bolt", coreStats: ["communication", "careerPotential"], statBar: 35, salaryMult: 1.0, rarity: "common", riskLevel: 0.03, desc: "영업·협상·외근" },
-  cs: { label: "고객지원/CS", icon: "speech", coreStats: ["communication"], statBar: 28, salaryMult: 0.9, rarity: "common", riskLevel: 0.016, desc: "응대·공감·감정노동" },
+  production: { label: "생산/품질/구매", icon: "exercise", coreStats: ["discipline", "fitness", "strength"], statBar: 35, salaryMult: 0.95, rarity: "common", riskLevel: 0.05, hireMod: 8, desc: "공정·품질·현장(위험)" },
+  sales: { label: "영업/영업관리", icon: "bolt", coreStats: ["communication", "careerPotential"], statBar: 35, salaryMult: 1.0, rarity: "common", riskLevel: 0.03, hireMod: 12, desc: "영업·협상·외근" },
+  cs: { label: "고객지원/CS", icon: "speech", coreStats: ["communication"], statBar: 28, salaryMult: 0.9, rarity: "common", riskLevel: 0.016, hireMod: 15, desc: "응대·공감·감정노동" },
   // 피지컬 스포츠 — 키가 클수록 유리(농구·배구 등). 부상 위험 ↑
-  athlete: { label: "스포츠/운동선수", icon: "exercise", coreStats: ["fitness", "stamina", "strength", "discipline"], statBar: 48, salaryMult: 1.2, rarity: "rare", riskLevel: 0.03, heightBar: 183, desc: "농구·배구 등 피지컬 스포츠 (키·단련될수록 유리)" },
+  athlete: { label: "스포츠/운동선수", icon: "exercise", coreStats: ["fitness", "stamina", "strength", "discipline"], statBar: 48, salaryMult: 1.2, rarity: "rare", riskLevel: 0.03, heightBar: 183, hireMod: 0, desc: "농구·배구 등 피지컬 스포츠 (키·단련될수록 유리)" },
 };
 
 export const RARITY_META: Record<
