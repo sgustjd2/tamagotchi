@@ -40,10 +40,10 @@ body {
     box-shadow: 1px 1px 0 0 rgba(46, 39, 34, 0.22);
   }
 
-  /* 픽셀풍 칩/뱃지 */
+  /* 픽셀풍 칩/뱃지 — 칩은 한 줄이 원칙(모바일 헤더에서 2줄로 꺾이는 문제 방지) */
   .pill {
-    @apply inline-flex items-center gap-1 rounded-md border-2 border-ink/80 px-2 py-0.5
-           font-pixel text-xs font-bold;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border-2 border-ink/80
+           px-2 py-0.5 font-pixel text-xs font-bold;
   }
 
   /* LCD 화면 */
