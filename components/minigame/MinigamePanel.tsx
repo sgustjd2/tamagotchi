@@ -86,8 +86,28 @@ export function MinigamePanel({ character }: { character: Character }) {
     };
   }, [expanded, timingStart]);
 
-  // 미취학 아동에겐 숨김(도박 콘텐츠) — 실제 게이트는 canPlayMinigame 에도 있음
-  if (character.ageYears < MINIGAME_MIN_AGE) return null;
+  // 미취학 아동에겐 잠금 티저 — 탭이 텅 비어 보이지 않게. 실제 게이트는 canPlayMinigame 에도 있음
+  if (character.ageYears < MINIGAME_MIN_AGE) {
+    return (
+      <div className="card p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="font-pixel text-sm font-bold text-ink/80">미니게임</h3>
+          <span className="pill bg-black/10 text-ink/50">🔒 {MINIGAME_MIN_AGE}살부터</span>
+        </div>
+        <div className="flex items-center justify-center gap-2.5 rounded-xl bg-black/[0.04] py-3 text-xl opacity-40 grayscale">
+          {GAMES.map((g) => (
+            <span key={g.kind} aria-hidden>
+              {g.emoji}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-center font-sans text-[11px] font-medium text-ink/50">
+          {MINIGAME_MIN_AGE}살이 되면 미니게임 {GAMES.length}종이 열려요 — 지금은 케어 탭에서
+          놀아주기로 함께 놀아요!
+        </p>
+      </div>
+    );
+  }
   const lacking = character.status.energy < MINIGAME_ENERGY_COST;
   const luckMaxed = character.stats.luck >= LUCK_CAP;
 
