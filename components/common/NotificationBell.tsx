@@ -30,7 +30,7 @@ export function NotificationBell({
         <button
           type="button"
           onClick={() => setShowHelp((v) => !v)}
-          className="pill bg-black/10 text-ink/40 transition-colors hover:bg-black/15"
+          className="pill bg-black/10 py-1.5 text-ink/40 transition-colors hover:bg-black/15 md:py-0.5"
         >
           🔕 알림 차단됨
         </button>
@@ -48,10 +48,11 @@ export function NotificationBell({
     <button
       type="button"
       onClick={onRequest}
-      className="pill bg-white text-ink/60 transition-colors hover:bg-cream"
+      className="pill bg-white py-1.5 text-ink/60 transition-colors hover:bg-cream md:py-0.5"
       title="탭이 열려 있는 동안 캐릭터가 배고프거나 아프면 알려드려요"
     >
-      🔔 알림 켜기
+      🔔 <span className="hidden sm:inline">알림 켜기</span>
+      <span className="sm:hidden">알림</span>
     </button>
   );
 }

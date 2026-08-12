@@ -86,8 +86,9 @@ export default function DashboardPage() {
           <SoundToggle />
           <NotificationBell permission={permission} onRequest={requestPermission} />
           {next && (
-            <span className="pill bg-white text-ink/60">
-              다음: {next.label}까지 {next.inYears}살
+            <span className="pill bg-white py-1.5 text-ink/60 md:py-0.5">
+              <span className="hidden sm:inline">다음:&nbsp;</span>
+              {next.label}까지 {next.inYears}살
             </span>
           )}
           <Link
