@@ -49,8 +49,13 @@ export default function LandingPage() {
       </section>
 
       <section className="mt-14 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f) => (
-          <div key={f.title} className="card p-5">
+        {FEATURES.map((f, i) => (
+          <div
+            key={f.title}
+            className={`card p-5 transition-transform duration-200 ease-out hover:-translate-y-1 hover:rotate-0 ${
+              i % 2 === 0 ? "sm:-rotate-1" : "sm:rotate-1"
+            }`}
+          >
             <span className="text-ink">
               <PixelIcon name={f.icon} size={28} />
             </span>
