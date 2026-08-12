@@ -28,7 +28,7 @@ export function SaveNotice() {
   };
 
   return (
-    <div className="card flex items-start gap-2 p-3 text-[12px] text-ink/70">
+    <div className="flex items-start gap-2 rounded-xl border-2 border-ink/15 bg-white/70 px-3 py-2 text-[12px] text-ink/60">
       <p className="flex-1 leading-snug">
         진행 데이터는 <b>이 브라우저에만</b> 저장돼요. 다른 기기·시크릿 모드에선
         이어할 수 없어요. (기기 간 이어하기는 추후 지원)
