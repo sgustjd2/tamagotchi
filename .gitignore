@@ -29,3 +29,4 @@ yarn-error.log*
 .claude/
 .vscode/
 .idea/
+.gstack/
