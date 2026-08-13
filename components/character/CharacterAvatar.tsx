@@ -126,6 +126,9 @@ export function CharacterAvatar({ character }: { character: Character }) {
             accessory={equippedOf(character).accessory ?? null}
             family={family}
             pet={pet}
+            appearance={character.appearance}
+            gender={character.gender}
+            happy={vs.state === "happy"}
             onUnavailable={() => setMode3d(false)}
           />
         ) : (

@@ -3,11 +3,18 @@
 // 복셀 3D 디오라마 — 방+캐릭터+가족+소유 가구 전체를 three.js 박스 조합으로 그린다.
 // 외부 모델/텍스처 없이 코드 생성. R3F v8(React 18) + three 0.170 고정.
 // 반드시 DioramaCard 의 dynamic(ssr:false) 뒤에서만 임포트할 것(SSR 크래시 방지).
+// 화면 속 세계: 드래그로 방을 좌우로 둘러볼 수 있다(3초 방치 시 원위치).
 
-import { useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { Group, Mesh } from "three";
-import type { LifeStage, RoomItemKey, WardrobeItemKey } from "@/types/character";
+import type {
+  CharacterAppearance,
+  Gender,
+  LifeStage,
+  RoomItemKey,
+  WardrobeItemKey,
+} from "@/types/character";
 import { STAGE_CONFIG } from "@/lib/game/sprite/characterStageConfig";
 import { CHARACTER_PALETTES } from "@/lib/game/sprite/characterPalettes";
 import { THEME_TINT } from "@/components/game/PixelRoom";
@@ -66,7 +73,7 @@ function B({
 }
 
 // ---------------------------------------------------------------------------
-// 복셀 캐릭터 — 성장 티어별 박스 치수(디자인 스펙 수치 그대로)
+// 복셀 캐릭터 — 사람다운 실루엣(작아진 머리·목·손·신발) + 성장 티어 4단계
 // 각 파트: [w, h, d, x, y, z]
 // ---------------------------------------------------------------------------
 
@@ -76,9 +83,16 @@ interface TierSpec {
   body: Part;
   arms: Part[];
   head: Part;
-  hair: Part[];
+  neck?: Part;
+  /** tiny 전용 고정 헤어캡(아기는 헤어스타일 미적용) */
+  babyHair?: Part[];
   eyes: Part[];
   cheeks: Part[];
+  mouthN: Part;
+  mouthH: Part;
+  shoes: Part[];
+  shoeColor: string;
+  hand: { s: [number, number, number]; off: [number, number, number] };
 }
 
 const TIERS: Record<"tiny" | "small" | "mid" | "full", TierSpec> = {
@@ -93,7 +107,7 @@ const TIERS: Record<"tiny" | "small" | "mid" | "full", TierSpec> = {
       [0.16, 0.26, 0.2, -0.38, 0.42, 0],
     ],
     head: [0.95, 0.8, 0.85, 0, 0.98, 0],
-    hair: [[1.0, 0.28, 0.9, 0, 1.32, 0]],
+    babyHair: [[1.0, 0.28, 0.9, 0, 1.32, 0]],
     eyes: [
       [0.12, 0.15, 0.06, 0.2, 0.98, 0.455],
       [0.12, 0.15, 0.06, -0.2, 0.98, 0.455],
@@ -102,82 +116,105 @@ const TIERS: Record<"tiny" | "small" | "mid" | "full", TierSpec> = {
       [0.13, 0.08, 0.05, 0.32, 0.83, 0.44],
       [0.13, 0.08, 0.05, -0.32, 0.83, 0.44],
     ],
+    mouthN: [0.1, 0.035, 0.05, 0, 0.86, 0.45],
+    mouthH: [0.14, 0.05, 0.05, 0, 0.865, 0.45],
+    shoes: [
+      [0.22, 0.08, 0.28, 0.14, 0.04, 0.04],
+      [0.22, 0.08, 0.28, -0.14, 0.04, 0.04],
+    ],
+    shoeColor: "#FFDFC4",
+    hand: { s: [0.13, 0.09, 0.16], off: [0, -0.15, 0.01] },
   },
   small: {
     legs: [
-      [0.28, 0.3, 0.3, 0.18, 0.15, 0],
-      [0.28, 0.3, 0.3, -0.18, 0.15, 0],
+      [0.26, 0.36, 0.3, 0.18, 0.26, 0],
+      [0.26, 0.36, 0.3, -0.18, 0.26, 0],
     ],
-    body: [0.75, 0.55, 0.5, 0, 0.575, 0],
+    body: [0.75, 0.55, 0.5, 0, 0.7, 0],
     arms: [
-      [0.22, 0.4, 0.26, 0.5, 0.62, 0],
-      [0.22, 0.4, 0.26, -0.5, 0.62, 0],
+      [0.22, 0.4, 0.26, 0.5, 0.75, 0],
+      [0.22, 0.4, 0.26, -0.5, 0.75, 0],
     ],
-    head: [1.1, 0.9, 1.0, 0, 1.3, 0],
-    hair: [
-      [1.16, 0.32, 1.06, 0, 1.68, 0],
-      [1.16, 0.2, 0.08, 0, 1.56, 0.52],
-    ],
+    head: [0.98, 0.76, 0.9, 0, 1.44, 0],
+    neck: [0.26, 0.12, 0.26, 0, 0.99, 0],
     eyes: [
-      [0.13, 0.16, 0.06, 0.24, 1.3, 0.53],
-      [0.13, 0.16, 0.06, -0.24, 1.3, 0.53],
+      [0.12, 0.15, 0.06, 0.21, 1.47, 0.48],
+      [0.12, 0.15, 0.06, -0.21, 1.47, 0.48],
     ],
     cheeks: [
-      [0.14, 0.09, 0.05, 0.36, 1.1, 0.51],
-      [0.14, 0.09, 0.05, -0.36, 1.1, 0.51],
+      [0.13, 0.08, 0.05, 0.33, 1.32, 0.47],
+      [0.13, 0.08, 0.05, -0.33, 1.32, 0.47],
     ],
+    mouthN: [0.13, 0.04, 0.05, 0, 1.3, 0.475],
+    mouthH: [0.18, 0.06, 0.05, 0, 1.31, 0.475],
+    shoes: [
+      [0.3, 0.11, 0.38, 0.18, 0.055, 0.04],
+      [0.3, 0.11, 0.38, -0.18, 0.055, 0.04],
+    ],
+    shoeColor: "#E8E4DA",
+    hand: { s: [0.18, 0.12, 0.22], off: [0, -0.22, 0.01] },
   },
   mid: {
     legs: [
-      [0.3, 0.42, 0.34, 0.2, 0.21, 0],
-      [0.3, 0.42, 0.34, -0.2, 0.21, 0],
+      [0.29, 0.46, 0.33, 0.2, 0.32, 0],
+      [0.29, 0.46, 0.33, -0.2, 0.32, 0],
     ],
-    body: [0.85, 0.7, 0.55, 0, 0.77, 0],
+    body: [0.85, 0.7, 0.55, 0, 0.9, 0],
     arms: [
-      [0.24, 0.5, 0.28, 0.56, 0.85, 0],
-      [0.24, 0.5, 0.28, -0.56, 0.85, 0],
+      [0.24, 0.5, 0.28, 0.56, 0.98, 0],
+      [0.24, 0.5, 0.28, -0.56, 0.98, 0],
     ],
-    head: [1.15, 0.95, 1.05, 0, 1.6, 0],
-    hair: [
-      [1.21, 0.34, 1.11, 0, 2.0, 0],
-      [1.21, 0.2, 0.08, 0, 1.87, 0.55],
-    ],
+    head: [1.02, 0.82, 0.94, 0, 1.74, 0],
+    neck: [0.3, 0.14, 0.3, 0, 1.28, 0],
     eyes: [
-      [0.13, 0.17, 0.06, 0.26, 1.6, 0.555],
-      [0.13, 0.17, 0.06, -0.26, 1.6, 0.555],
+      [0.13, 0.16, 0.06, 0.22, 1.78, 0.5],
+      [0.13, 0.16, 0.06, -0.22, 1.78, 0.5],
     ],
     cheeks: [
-      [0.15, 0.09, 0.05, 0.38, 1.38, 0.53],
-      [0.15, 0.09, 0.05, -0.38, 1.38, 0.53],
+      [0.14, 0.09, 0.05, 0.36, 1.63, 0.49],
+      [0.14, 0.09, 0.05, -0.36, 1.63, 0.49],
     ],
+    mouthN: [0.14, 0.045, 0.05, 0, 1.6, 0.495],
+    mouthH: [0.2, 0.07, 0.05, 0, 1.6, 0.495],
+    shoes: [
+      [0.33, 0.12, 0.42, 0.2, 0.06, 0.045],
+      [0.33, 0.12, 0.42, -0.2, 0.06, 0.045],
+    ],
+    shoeColor: "#E8E4DA",
+    hand: { s: [0.2, 0.13, 0.24], off: [0, -0.27, 0.01] },
   },
   full: {
     legs: [
-      [0.32, 0.5, 0.36, 0.22, 0.25, 0],
-      [0.32, 0.5, 0.36, -0.22, 0.25, 0],
+      [0.31, 0.52, 0.35, 0.22, 0.4, 0],
+      [0.31, 0.52, 0.35, -0.22, 0.4, 0],
     ],
-    body: [0.95, 0.85, 0.6, 0, 0.925, 0],
+    body: [0.95, 0.85, 0.6, 0, 1.085, 0],
     arms: [
-      [0.26, 0.6, 0.3, 0.62, 1.0, 0],
-      [0.26, 0.6, 0.3, -0.62, 1.0, 0],
+      [0.26, 0.6, 0.3, 0.62, 1.16, 0],
+      [0.26, 0.6, 0.3, -0.62, 1.16, 0],
     ],
-    head: [1.25, 1.05, 1.1, 0, 1.9, 0],
-    hair: [
-      [1.31, 0.36, 1.16, 0, 2.34, 0],
-      [1.31, 0.22, 0.08, 0, 2.16, 0.57],
-    ],
+    head: [1.05, 0.92, 1.0, 0, 2.06, 0],
+    neck: [0.34, 0.16, 0.34, 0, 1.55, 0],
     eyes: [
-      [0.14, 0.18, 0.06, 0.28, 1.9, 0.58],
-      [0.14, 0.18, 0.06, -0.28, 1.9, 0.58],
+      [0.14, 0.17, 0.06, 0.24, 2.09, 0.53],
+      [0.14, 0.17, 0.06, -0.24, 2.09, 0.53],
     ],
     cheeks: [
-      [0.16, 0.1, 0.05, 0.42, 1.72, 0.575],
-      [0.16, 0.1, 0.05, -0.42, 1.72, 0.575],
+      [0.15, 0.09, 0.05, 0.38, 1.92, 0.525],
+      [0.15, 0.09, 0.05, -0.38, 1.92, 0.525],
     ],
+    mouthN: [0.16, 0.05, 0.05, 0, 1.9, 0.525],
+    mouthH: [0.24, 0.08, 0.05, 0, 1.9, 0.525],
+    shoes: [
+      [0.36, 0.14, 0.46, 0.22, 0.07, 0.05],
+      [0.36, 0.14, 0.46, -0.22, 0.07, 0.05],
+    ],
+    shoeColor: "#E8E4DA",
+    hand: { s: [0.22, 0.15, 0.26], off: [0, -0.33, 0.01] },
   },
 };
 
-/** 의상/액세서리 좌표는 full 티어 기준 — 다른 티어는 키 비율로 축소 */
+/** 헤어/의상/액세서리 좌표는 full 티어 기준 — 다른 티어는 키 비율로 축소 */
 const TIER_RATIO: Record<keyof typeof TIERS, number> = {
   tiny: 0.56,
   small: 0.71,
@@ -186,154 +223,197 @@ const TIER_RATIO: Record<keyof typeof TIERS, number> = {
 };
 
 const SKIN = "#FFDFC4";
-const HAIR = "#6B4A38";
 const INK = "#2E2722";
 const CHEEK = "#FFB7C5";
+const HAIR_TONE = { dark: "#6B4A38", light: "#A67C5A" } as const;
 
 // 컬러 박스: [w,h,d,x,y,z,color] (+선택 rx)
 type CBox = [number, number, number, number, number, number, string, number?];
 
-/** 착용 의상 → 몸통 색 + 포인트 박스(full 티어 좌표) */
+/** 헤어스타일 5종(2D hairVariant 0~4와 대응) — full 좌표, 색은 hairTone 으로 대체 */
+const HAIR_BASE: Part = [1.11, 0.3, 1.06, 0, 2.44, 0];
+const HAIR_VARIANTS: Part[][] = [
+  // 0 가르마 — 앞머리 두 쪽, 가운데 스킨 갭이 가르마 라인
+  [
+    [0.44, 0.2, 0.1, -0.26, 2.32, 0.51],
+    [0.44, 0.2, 0.1, 0.26, 2.32, 0.51],
+  ],
+  // 1 사이드 — 비대칭 스윕, 오른쪽 이마 노출
+  [
+    [0.7, 0.22, 0.1, -0.17, 2.31, 0.51],
+    [0.26, 0.12, 0.1, 0.37, 2.36, 0.51],
+  ],
+  // 2 스파이키 — 이마 노출 + 스파이크 3개
+  [
+    [0.2, 0.24, 0.2, -0.3, 2.66, 0.05],
+    [0.18, 0.3, 0.18, 0.02, 2.7, -0.05],
+    [0.2, 0.22, 0.2, 0.32, 2.64, 0.1],
+  ],
+  // 3 일자 풀뱅
+  [[1.11, 0.26, 0.1, 0, 2.33, 0.51]],
+  // 4 곱슬 — 양옆+정수리 범프
+  [
+    [0.28, 0.22, 0.28, -0.46, 2.36, 0.3],
+    [0.28, 0.22, 0.28, 0.46, 2.36, 0.3],
+    [0.3, 0.2, 0.3, 0, 2.63, 0.05],
+  ],
+];
+
+/** 여성 롱헤어(뒷판+옆머리) — full 좌표 */
+const FEMALE_HAIR: Part[] = [
+  [0.92, 0.85, 0.18, 0, 1.98, -0.5],
+  [0.16, 0.6, 0.3, 0.57, 1.95, 0.18],
+  [0.16, 0.6, 0.3, -0.57, 1.95, 0.18],
+];
+
+/** 착용 의상 → 몸통 색 + 포인트 박스(full 좌표, 새 신체 앵커 반영) */
 const OUTFITS: Record<string, { c: string; extra?: CBox[] }> = {
   stripeTee: {
     c: "#AEDFF7",
     extra: [
-      [0.99, 0.12, 0.64, 0, 1.08, 0, "#FFF8F0"],
-      [0.99, 0.12, 0.64, 0, 0.78, 0, "#FFF8F0"],
+      [0.99, 0.12, 0.64, 0, 1.24, 0, "#FFF8F0"],
+      [0.99, 0.12, 0.64, 0, 0.94, 0, "#FFF8F0"],
     ],
   },
   hoodie: {
     c: "#A8E6CF",
     extra: [
-      [0.95, 0.55, 0.28, 0, 1.45, -0.46, "#8CD4B8"],
-      [0.1, 0.14, 0.05, 0, 1.15, 0.31, "#FFF8F0"],
+      [0.95, 0.55, 0.28, 0, 1.55, -0.46, "#8CD4B8"],
+      [0.1, 0.14, 0.05, 0, 1.31, 0.31, "#FFF8F0"],
     ],
   },
-  jacket: { c: "#FF9A8B", extra: [[0.08, 0.8, 0.05, 0, 0.92, 0.31, "#2E2722"]] },
+  jacket: { c: "#FF9A8B", extra: [[0.08, 0.8, 0.05, 0, 1.08, 0.31, "#2E2722"]] },
   suit: {
     c: "#4A4038",
     extra: [
-      [0.32, 0.16, 0.05, 0, 1.27, 0.31, "#FFF8F0"],
-      [0.13, 0.48, 0.05, 0, 1.02, 0.31, "#FF9A8B"],
+      [0.32, 0.16, 0.05, 0, 1.43, 0.31, "#FFF8F0"],
+      [0.13, 0.48, 0.05, 0, 1.18, 0.31, "#FF9A8B"],
     ],
   },
   training: {
     c: "#C9B6F2",
     extra: [
-      [0.07, 0.85, 0.62, 0.47, 0.925, 0, "#FFF8F0"],
-      [0.07, 0.85, 0.62, -0.47, 0.925, 0, "#FFF8F0"],
+      [0.07, 0.85, 0.62, 0.47, 1.085, 0, "#FFF8F0"],
+      [0.07, 0.85, 0.62, -0.47, 1.085, 0, "#FFF8F0"],
     ],
   },
-  dress: { c: "#FFB7C5", extra: [[1.15, 0.38, 0.8, 0, 0.34, 0, "#F79BB0"]] },
+  dress: { c: "#FFB7C5", extra: [[1.15, 0.38, 0.8, 0, 0.44, 0, "#F79BB0"]] },
   padding: {
     c: "#FFE3A3",
     extra: [
-      [1.0, 0.07, 0.64, 0, 1.05, 0, "#E8C97F"],
-      [1.0, 0.07, 0.64, 0, 0.78, 0, "#E8C97F"],
+      [1.0, 0.07, 0.64, 0, 1.21, 0, "#E8C97F"],
+      [1.0, 0.07, 0.64, 0, 0.94, 0, "#E8C97F"],
     ],
   },
-  leather: { c: "#3B3230", extra: [[0.06, 0.78, 0.05, 0.13, 0.94, 0.31, "#B9B4AE"]] },
+  leather: { c: "#3B3230", extra: [[0.06, 0.78, 0.05, 0.13, 1.1, 0.31, "#B9B4AE"]] },
   overalls: {
     c: "#6E9ECF",
     extra: [
-      [0.97, 0.2, 0.62, 0, 1.26, 0, "#FFE3A3"],
-      [0.28, 0.18, 0.05, 0, 1.0, 0.31, "#5B84B8"],
+      [0.97, 0.2, 0.62, 0, 1.42, 0, "#FFE3A3"],
+      [0.28, 0.18, 0.05, 0, 1.16, 0.31, "#5B84B8"],
     ],
   },
-  swimsuit: { c: "#7ED4E6", extra: [[0.99, 0.12, 0.64, 0, 0.68, 0, "#FFF8F0"]] },
+  swimsuit: { c: "#7ED4E6", extra: [[0.99, 0.12, 0.64, 0, 0.84, 0, "#FFF8F0"]] },
   baseballUniform: {
     c: "#FFF8F0",
     extra: [
-      [0.45, 0.2, 0.05, 0, 1.08, 0.31, "#FF9A8B"],
-      [0.97, 0.1, 0.62, 0, 0.56, 0, "#2E2722"],
+      [0.45, 0.2, 0.05, 0, 1.24, 0.31, "#FF9A8B"],
+      [0.97, 0.1, 0.62, 0, 0.72, 0, "#2E2722"],
     ],
   },
-  knitCardigan: { c: "#E5C29F", extra: [[0.08, 0.68, 0.05, 0, 0.9, 0.31, "#9C744F"]] },
+  knitCardigan: { c: "#E5C29F", extra: [[0.08, 0.68, 0.05, 0, 1.06, 0.31, "#9C744F"]] },
   denimSet: {
     c: "#7EA8D8",
     extra: [
-      [0.99, 0.16, 0.64, 0, 0.62, 0, "#5B84B8"],
-      [0.22, 0.16, 0.05, 0.18, 1.08, 0.31, "#5B84B8"],
+      [0.99, 0.16, 0.64, 0, 0.78, 0, "#5B84B8"],
+      [0.22, 0.16, 0.05, 0.18, 1.24, 0.31, "#5B84B8"],
     ],
   },
   trenchCoat: {
     c: "#D9B98C",
     extra: [
-      [1.0, 0.13, 0.66, 0, 0.76, 0, "#9C744F"],
-      [1.05, 0.25, 0.7, 0, 0.4, 0, "#D9B98C"],
+      [1.0, 0.13, 0.66, 0, 0.92, 0, "#9C744F"],
+      [1.05, 0.25, 0.7, 0, 0.5, 0, "#D9B98C"],
     ],
   },
   hanbok: {
     c: "#E0697E",
     extra: [
-      [1.2, 0.5, 0.85, 0, 0.3, 0, "#C9B6F2"],
-      [0.13, 0.4, 0.05, 0.1, 1.1, 0.31, "#FFF8F0"],
+      [1.2, 0.5, 0.85, 0, 0.4, 0, "#C9B6F2"],
+      [0.13, 0.4, 0.05, 0.1, 1.26, 0.31, "#FFF8F0"],
     ],
   },
   tuxedo: {
     c: "#332C28",
     extra: [
-      [0.34, 0.5, 0.05, 0, 1.08, 0.31, "#FFF8F0"],
-      [0.24, 0.11, 0.06, 0, 1.3, 0.32, "#2E2722"],
+      [0.34, 0.5, 0.05, 0, 1.24, 0.31, "#FFF8F0"],
+      [0.24, 0.11, 0.06, 0, 1.46, 0.32, "#2E2722"],
     ],
   },
 };
 
-/** 착용 액세서리 → 포인트 박스(full 티어 좌표) */
+/** 착용 액세서리 → 포인트 박스(full 좌표, 새 머리 위치 y2.06·헤어탑 2.59 반영) */
 const ACCESSORIES: Record<string, CBox[]> = {
   ribbon: [
-    [0.32, 0.16, 0.14, 0.35, 2.47, 0.15, "#FFB7C5"],
-    [0.1, 0.1, 0.15, 0.35, 2.47, 0.15, "#F79BB0"],
+    [0.32, 0.16, 0.14, 0.33, 2.6, 0.15, "#FFB7C5"],
+    [0.1, 0.1, 0.15, 0.33, 2.6, 0.15, "#F79BB0"],
   ],
   cap: [
-    [1.3, 0.26, 1.15, 0, 2.5, 0, "#AEDFF7"],
-    [0.95, 0.08, 0.5, 0, 2.42, 0.78, "#AEDFF7"],
+    [1.18, 0.26, 1.1, 0, 2.66, 0, "#AEDFF7"],
+    [0.9, 0.08, 0.5, 0, 2.58, 0.72, "#AEDFF7"],
   ],
   beanie: [
-    [1.3, 0.35, 1.15, 0, 2.52, 0, "#FF9A8B"],
-    [1.34, 0.12, 1.19, 0, 2.38, 0, "#E8857A"],
+    [1.18, 0.35, 1.1, 0, 2.66, 0, "#FF9A8B"],
+    [1.22, 0.12, 1.14, 0, 2.5, 0, "#E8857A"],
   ],
   scarf: [
-    [1.05, 0.28, 0.85, 0, 1.37, 0, "#FFE3A3"],
-    [0.24, 0.5, 0.1, 0.2, 1.02, 0.34, "#FFE3A3"],
+    [0.95, 0.28, 0.75, 0, 1.55, 0, "#FFE3A3"],
+    [0.24, 0.5, 0.1, 0.2, 1.2, 0.32, "#FFE3A3"],
   ],
-  sunglasses: [[0.9, 0.18, 0.06, 0, 1.9, 0.56, "#2E2722"]],
+  sunglasses: [[0.9, 0.2, 0.06, 0, 2.09, 0.56, "#2E2722"]],
   headphones: [
-    [1.44, 0.12, 0.25, 0, 2.5, 0, "#C9B6F2"],
-    [0.2, 0.4, 0.4, 0.72, 1.9, 0, "#A98FE0"],
-    [0.2, 0.4, 0.4, -0.72, 1.9, 0, "#A98FE0"],
+    [1.3, 0.12, 0.25, 0, 2.62, 0, "#C9B6F2"],
+    [0.2, 0.38, 0.38, 0.6, 2.06, 0, "#A98FE0"],
+    [0.2, 0.38, 0.38, -0.6, 2.06, 0, "#A98FE0"],
   ],
   necklace: [
-    [0.5, 0.06, 0.06, 0, 1.3, 0.32, "#F2C94C"],
-    [0.1, 0.12, 0.06, 0, 1.2, 0.33, "#F2C94C"],
+    [0.5, 0.06, 0.06, 0, 1.44, 0.32, "#F2C94C"],
+    [0.1, 0.12, 0.06, 0, 1.34, 0.33, "#F2C94C"],
   ],
   crown: [
-    [0.7, 0.3, 0.7, 0, 2.58, 0, "#F2C94C"],
-    [0.78, 0.1, 0.78, 0, 2.44, 0, "#E0B43A"],
+    [0.7, 0.3, 0.7, 0, 2.74, 0, "#F2C94C"],
+    [0.78, 0.1, 0.78, 0, 2.6, 0, "#E0B43A"],
   ],
-  hairpin: [[0.28, 0.08, 0.06, -0.35, 2.2, 0.56, "#A8E6CF"]],
+  hairpin: [[0.28, 0.08, 0.06, -0.32, 2.34, 0.52, "#A8E6CF"]],
   gloves: [
-    [0.22, 0.26, 0.28, 0.6, 0.55, 0, "#A8E6CF"],
-    [0.22, 0.26, 0.28, -0.6, 0.55, 0, "#A8E6CF"],
+    [0.24, 0.18, 0.28, 0.62, 0.83, 0.01, "#A8E6CF"],
+    [0.24, 0.18, 0.28, -0.62, 0.83, 0.01, "#A8E6CF"],
   ],
   bowtie: [
-    [0.3, 0.14, 0.08, 0, 1.32, 0.33, "#FF9A8B"],
-    [0.08, 0.1, 0.09, 0, 1.32, 0.34, "#E8857A"],
+    [0.3, 0.14, 0.08, 0, 1.48, 0.33, "#FF9A8B"],
+    [0.08, 0.1, 0.09, 0, 1.48, 0.34, "#E8857A"],
   ],
   backpack: [
-    [0.7, 0.6, 0.3, 0, 1.0, -0.48, "#C9B6F2"],
-    [0.4, 0.25, 0.08, 0, 0.88, -0.66, "#A98FE0"],
+    [0.7, 0.6, 0.3, 0, 1.16, -0.48, "#C9B6F2"],
+    [0.4, 0.25, 0.08, 0, 1.04, -0.66, "#A98FE0"],
   ],
-  watch: [[0.16, 0.1, 0.16, 0.6, 0.68, 0.05, "#AEDFF7"]],
+  watch: [[0.16, 0.1, 0.16, 0.62, 0.9, 0.05, "#AEDFF7"]],
   earrings: [
-    [0.08, 0.14, 0.08, 0.66, 1.75, 0, "#F2C94C"],
-    [0.08, 0.14, 0.08, -0.66, 1.75, 0, "#F2C94C"],
+    [0.08, 0.14, 0.08, 0.56, 1.9, 0, "#F2C94C"],
+    [0.08, 0.14, 0.08, -0.56, 1.9, 0, "#F2C94C"],
   ],
-  brooch: [[0.14, 0.14, 0.08, -0.25, 1.2, 0.33, "#C9B6F2"]],
-  anklet: [[0.18, 0.06, 0.18, 0.25, 0.1, 0, "#F2C94C"]],
+  brooch: [[0.14, 0.14, 0.08, -0.25, 1.36, 0.33, "#C9B6F2"]],
+  anklet: [[0.18, 0.06, 0.18, 0.25, 0.12, 0, "#F2C94C"]],
 };
 
 type Pose = "stand" | "sit" | "lie" | "exercise";
+
+interface CharAppearance {
+  hairVariant: 0 | 1 | 2 | 3 | 4;
+  hairTone: "dark" | "light";
+  glasses: boolean;
+  faceAccent?: "none" | "freckles" | "blush";
+}
 
 function VoxelCharacter({
   tier,
@@ -346,6 +426,9 @@ function VoxelCharacter({
   scale = 1,
   outfit = null,
   accessory = null,
+  appearance,
+  female = false,
+  happy = false,
 }: {
   tier: keyof typeof TIERS;
   clothes: string;
@@ -357,6 +440,9 @@ function VoxelCharacter({
   scale?: number;
   outfit?: WardrobeItemKey | null;
   accessory?: WardrobeItemKey | null;
+  appearance?: CharAppearance;
+  female?: boolean;
+  happy?: boolean;
 }) {
   const inner = useRef<Group>(null);
   const eyeL = useRef<Mesh>(null);
@@ -372,11 +458,9 @@ function VoxelCharacter({
     if (grp) {
       const br = Math.sin((2 * Math.PI * t) / 2.2);
       if (pose === "lie") {
-        // 수면: 미세한 숨만, 둥실 없음
         grp.scale.set(1 - 0.005 * br, 1 + 0.01 * br, 1 - 0.005 * br);
         grp.position.y = 0;
       } else if (pose === "exercise") {
-        // 점핑잭 바운스 + 강한 스쿼시
         grp.scale.set(1 - 0.02 * br, 1 + 0.04 * br, 1 - 0.02 * br);
         grp.position.y = 0.12 * Math.abs(Math.sin((2 * Math.PI * t) / 1.0));
       } else {
@@ -384,7 +468,6 @@ function VoxelCharacter({
         grp.position.y = 0.03 * Math.sin((2 * Math.PI * t) / 2.8 + Math.PI / 2);
       }
     }
-    // 팔 — 포즈별
     if (armL.current && armR.current) {
       if (pose === "exercise") {
         const pump = 0.35 * Math.sin((2 * Math.PI * t) / 1.0);
@@ -402,7 +485,6 @@ function VoxelCharacter({
         armR.current.rotation.set(0, 0, -sway);
       }
     }
-    // 눈 — 수면 중엔 감은 채 고정, 그 외엔 깜빡임
     if (pose === "lie") {
       if (eyeL.current) eyeL.current.scale.y = 0.1;
       if (eyeR.current) eyeR.current.scale.y = 0.1;
@@ -423,6 +505,8 @@ function VoxelCharacter({
   const o = outfit ? OUTFITS[outfit] : undefined;
   const clothesColor = o?.c ?? clothes;
   const r = TIER_RATIO[tier];
+  const hairColor = HAIR_TONE[appearance?.hairTone ?? "dark"];
+  const faceAccent = appearance?.faceAccent ?? "blush";
   const part = (p: Part, c: string, ref?: React.Ref<Mesh>) => (
     <mesh key={`${p.join()}${c}`} ref={ref} position={[p[3], p[4], p[5]]}>
       <boxGeometry args={[p[0], p[1], p[2]]} />
@@ -435,27 +519,57 @@ function VoxelCharacter({
       <meshLambertMaterial color={col(b[6])} />
     </mesh>
   );
+  const hand = spec.hand;
+  const armWithHand = (p: Part, ref: React.Ref<Mesh>) => (
+    <mesh ref={ref} position={[p[3], p[4], p[5]]}>
+      <boxGeometry args={[p[0], p[1], p[2]]} />
+      <meshLambertMaterial color={col(clothesColor)} />
+      {/* 손 — 팔 메시의 자식이라 스윙/만세를 따라간다 */}
+      <mesh position={hand.off}>
+        <boxGeometry args={hand.s} />
+        <meshLambertMaterial color={col(SKIN)} />
+      </mesh>
+    </mesh>
+  );
 
   return (
     <group position={position} rotation={[pose === "lie" ? -Math.PI / 2 : 0, rotY, 0]} scale={scale}>
       <group ref={inner}>
-        <group visible={pose !== "sit"}>{spec.legs.map((p) => part(p, "#5C4A3D"))}</group>
+        <group visible={pose !== "sit"}>
+          {spec.legs.map((p) => part(p, "#5C4A3D"))}
+          {spec.shoes.map((p) => part(p, spec.shoeColor))}
+        </group>
         {part(spec.body, clothesColor)}
-        {part(spec.arms[0], clothesColor, armL)}
-        {part(spec.arms[1], clothesColor, armR)}
+        {armWithHand(spec.arms[0], armL)}
+        {armWithHand(spec.arms[1], armR)}
+        {spec.neck && part(spec.neck, SKIN)}
         {part(spec.head, SKIN)}
-        {spec.hair.map((p) => part(p, HAIR))}
+        {/* 아기: 고정 배냇머리 / 그 외: 헤어스타일 5종 + 여성 롱헤어(비율 축소 그룹) */}
+        {spec.babyHair?.map((p) => part(p, hairColor))}
         {part(spec.eyes[0], INK, eyeL)}
         {part(spec.eyes[1], INK, eyeR)}
-        {spec.cheeks.map((p) => part(p, CHEEK))}
-        {/* 의상 포인트 + 액세서리 — full 티어 좌표를 키 비율로 축소 */}
-        {(o?.extra || accessory) && (
-          <group scale={r}>
-            {o?.extra?.map(cbox)}
-            {accessory && ACCESSORIES[accessory]?.map(cbox)}
-          </group>
-        )}
-        {/* 가짜 접지 그림자(수면 시 숨김 — 회전하면 수직 판이 되므로) */}
+        {part(happy ? spec.mouthH : spec.mouthN, happy ? "#B4574E" : INK)}
+        {faceAccent === "blush" && spec.cheeks.map((p) => part(p, CHEEK))}
+        <group scale={r}>
+          {!spec.babyHair && (
+            <>
+              {part(HAIR_BASE, hairColor)}
+              {HAIR_VARIANTS[appearance?.hairVariant ?? 0].map((p) => part(p, hairColor))}
+              {female && FEMALE_HAIR.map((p) => part(p, hairColor))}
+            </>
+          )}
+          {!spec.babyHair && appearance?.glasses && (
+            <B p={[0, 2.09, 0.555]} s={[0.94, 0.22, 0.03]} c={INK} opacity={0.3} />
+          )}
+          {!spec.babyHair && faceAccent === "freckles" && (
+            <>
+              <B p={[0.3, 1.97, 0.53]} s={[0.05, 0.04, 0.03]} c="#E8A87C" />
+              <B p={[-0.3, 1.97, 0.53]} s={[0.05, 0.04, 0.03]} c="#E8A87C" />
+            </>
+          )}
+          {o?.extra?.map(cbox)}
+          {accessory && ACCESSORIES[accessory]?.map(cbox)}
+        </group>
         {pose !== "lie" && <B p={[0, 0.011, 0]} s={[1.4, 0.02, 1.0]} c={INK} opacity={0.08} />}
       </group>
     </group>
@@ -597,7 +711,6 @@ function Items({ items, night }: { items: RoomItemKey[]; night: boolean }) {
           <B p={[0, 0.72, 0.68]} s={[0.08, 0.07, 0.05]} c={INK} />
         </group>
       )}
-      {/* --- 확장 20종 --- */}
       {has("poster") && (
         <group position={[3.9, 0, -4.96]}>
           <B p={[0, 2.6, 0]} s={[0.9, 1.2, 0.05]} c={c("#FFE3A3")} />
@@ -780,13 +893,54 @@ function Items({ items, night }: { items: RoomItemKey[]; night: boolean }) {
 }
 
 // ---------------------------------------------------------------------------
-// 루트 — 느린 요잉 스웨이 + 조명 + 씬 구성
+// 루트 — 드래그로 둘러보기 + 느린 요잉 스웨이
 // ---------------------------------------------------------------------------
 
 function Sway({ children }: { children: React.ReactNode }) {
   const g = useRef<Group>(null);
+  const { gl } = useThree();
+  const drag = useRef({ active: false, lastX: 0, yaw: 0, lastAt: 0 });
+
+  useEffect(() => {
+    const el = gl.domElement;
+    el.style.touchAction = "none";
+    el.style.cursor = "grab";
+    const down = (e: PointerEvent) => {
+      drag.current.active = true;
+      drag.current.lastX = e.clientX;
+      el.setPointerCapture?.(e.pointerId);
+      el.style.cursor = "grabbing";
+    };
+    const move = (e: PointerEvent) => {
+      if (!drag.current.active) return;
+      const dx = e.clientX - drag.current.lastX;
+      drag.current.lastX = e.clientX;
+      drag.current.yaw = Math.max(-0.9, Math.min(0.9, drag.current.yaw + dx * 0.005));
+      drag.current.lastAt = performance.now();
+    };
+    const up = () => {
+      drag.current.active = false;
+      drag.current.lastAt = performance.now();
+      el.style.cursor = "grab";
+    };
+    el.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+  }, [gl]);
+
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = 0.15 * Math.sin((2 * Math.PI * clock.getElapsedTime()) / 14);
+    const d = drag.current;
+    // 3초 이상 손을 떼면 천천히 정면으로 복귀
+    if (!d.active && performance.now() - d.lastAt > 3000) d.yaw *= 0.96;
+    if (g.current) {
+      g.current.rotation.y =
+        0.15 * Math.sin((2 * Math.PI * clock.getElapsedTime()) / 14) + d.yaw;
+    }
   });
   return <group ref={g}>{children}</group>;
 }
@@ -801,6 +955,9 @@ export interface VoxelDioramaProps {
   accessory: WardrobeItemKey | null;
   family: { spouse: boolean; children: number };
   pet?: "cat";
+  appearance?: CharacterAppearance;
+  gender?: Gender;
+  happy?: boolean;
 }
 
 /** 포즈별 캐릭터 배치 — sit=책상 스툴, lie=침대 위 */
@@ -821,6 +978,9 @@ export default function VoxelDiorama({
   accessory,
   family,
   pet,
+  appearance,
+  gender,
+  happy = false,
 }: VoxelDioramaProps) {
   const tier = STAGE_CONFIG[stage].tier;
   const theme = STAGE_CONFIG[stage].room;
@@ -839,6 +999,14 @@ export default function VoxelDiorama({
 
   const cc = (hex: string, f = 0.6) => (night ? nightify(hex, f) : hex);
   const place = POSE_PLACEMENT[pose];
+  const charAppearance: CharAppearance | undefined = appearance
+    ? {
+        hairVariant: appearance.hairVariant,
+        hairTone: appearance.hairTone,
+        glasses: appearance.glasses,
+        faceAccent: appearance.faceAccent,
+      }
+    : undefined;
 
   return (
     <Canvas
@@ -861,7 +1029,6 @@ export default function VoxelDiorama({
       <Sway>
         <Room wall={wall} wallSide={wallSide} floor={floor} night={night} />
         <Items items={items} night={night} />
-        {/* 공부 중: 스툴 + 책상 위 책 */}
         {pose === "sit" && (
           <group>
             <B p={[1.4, 0.225, -3.2]} s={[0.7, 0.45, 0.7]} c={cc("#C89B72")} />
@@ -877,8 +1044,10 @@ export default function VoxelDiorama({
           rotY={place.rotY}
           outfit={outfit}
           accessory={accessory}
+          appearance={charAppearance}
+          female={gender === "female"}
+          happy={happy}
         />
-        {/* 가족 — 배우자(포도색 정장 톤) + 아이 1~2명 */}
         {family.spouse && (
           <VoxelCharacter
             tier="full"
@@ -888,6 +1057,8 @@ export default function VoxelDiorama({
             rotY={1.5}
             scale={0.92}
             phase={1.3}
+            appearance={{ hairVariant: 0, hairTone: "light", glasses: false, faceAccent: "blush" }}
+            female={gender !== "female"}
           />
         )}
         {family.children >= 1 && (
@@ -909,9 +1080,9 @@ export default function VoxelDiorama({
             rotY={0.35}
             scale={0.82}
             phase={2.1}
+            appearance={{ hairVariant: 3, hairTone: "dark", glasses: false, faceAccent: "blush" }}
           />
         )}
-        {/* 행복도 펫 고양이 — 잘 때는 침대 발치 이불 위로 이동 */}
         {pet === "cat" &&
           (pose === "lie" ? (
             <VoxelCat position={[-2.7, 0.92, -1.55]} rotY={-0.6} night={night} />
