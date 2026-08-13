@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import type { Character } from "@/types/character";
 import { cn } from "@/lib/utils";
@@ -18,9 +18,9 @@ import { RoomShopPanel } from "@/components/room/RoomShopPanel";
 import { HousingPanel } from "@/components/room/HousingPanel";
 import { AssetPanel } from "@/components/room/AssetPanel";
 
-type TabKey = "care" | "status" | "play" | "shop";
+export type TabKey = "care" | "status" | "play" | "shop";
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
+export const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: "care", label: "케어", icon: "heart" },
   { key: "status", label: "상태", icon: "chart" },
   { key: "play", label: "놀이", icon: "play" },
@@ -30,20 +30,30 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
 /**
  * 다마고치식 탭 패널 — 페이지 스크롤 대신 탭으로 화면을 전환하고,
  * 긴 목록은 탭 내부에서만 스크롤한다(부모가 min-h-0 flex 로 높이를 잡아줘야 함).
+ * 탭 상태는 부모(기기 셸 A/B/C 버튼과 공유)가 소유하는 제어 컴포넌트.
+ * scrollSignal 이 바뀌면 같은 탭이어도 맨 위로 스크롤(B 버튼 = 확인).
  */
 export function DashboardTabs({
   character,
   now,
+  tab,
+  onTabChange,
+  scrollSignal = 0,
 }: {
   character: Character;
   now: number;
+  tab: TabKey;
+  onTabChange: (key: TabKey) => void;
+  scrollSignal?: number;
 }) {
-  const [tab, setTab] = useState<TabKey>("care");
   const scrollRef = useRef<HTMLDivElement>(null);
   const switchTab = (key: TabKey) => {
-    setTab(key);
+    onTabChange(key);
     scrollRef.current?.scrollTo({ top: 0 });
   };
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [tab, scrollSignal]);
   // 비활성 탭은 언마운트하지 않고 CSS 로만 숨긴다 — StudyCard 의 집중 세션
   // visibilitychange 추적(hiddenMs)이 탭 전환으로 끊기지 않아야 하기 때문
   const panelCls = (key: TabKey) =>

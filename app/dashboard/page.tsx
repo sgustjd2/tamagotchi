@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { CharacterAvatar } from "@/components/character/CharacterAvatar";
-import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+import {
+  DashboardTabs,
+  TABS,
+  type TabKey,
+} from "@/components/dashboard/DashboardTabs";
+import { DeviceShell } from "@/components/common/DeviceShell";
 import { StatBar } from "@/components/common/StatBar";
 import { Toast } from "@/components/common/Toast";
 import { OutcomeBurst } from "@/components/common/OutcomeBurst";
@@ -30,6 +35,15 @@ export default function DashboardPage() {
   const tick = useGameStore((s) => s.tick);
   const now = useNow(1000);
   const { permission, requestPermission } = useCareNotifications(character);
+
+  // 탭 상태 — 기기 셸 A/B/C 물리 버튼과 탭 패널이 공유(A=이전, B=확인/맨위, C=다음)
+  const [tab, setTab] = useState<TabKey>("care");
+  const [scrollSignal, setScrollSignal] = useState(0);
+  const cycleTab = (dir: 1 | -1) =>
+    setTab((t) => {
+      const i = TABS.findIndex((x) => x.key === t);
+      return TABS[(i + dir + TABS.length) % TABS.length].key;
+    });
 
   // 캐릭터가 없으면 생성 화면으로
   useEffect(() => {
@@ -75,8 +89,17 @@ export default function DashboardPage() {
   const next = nextStageInfo(character.ageYears);
 
   return (
-    // 다마고치처럼 한 화면 고정(h-dvh) — 페이지 스크롤 없이 탭 안에서만 스크롤
-    <main className="mx-auto flex h-dvh max-w-5xl flex-col gap-2.5 px-4 pb-[calc(4.25rem+env(safe-area-inset-bottom))] pt-3">
+    // 다마고치 기기 셸 — 한 화면 고정(h-dvh), 페이지 스크롤 없이 탭 안에서만 스크롤
+    <DeviceShell
+      onA={() => cycleTab(-1)}
+      onB={() => setScrollSignal((s) => s + 1)}
+      onC={() => cycleTab(1)}
+    >
+      <main className="contents">
+      {/* 스크린리더용 탭 변경 알림(A/C 버튼은 포커스가 버튼에 남으므로) */}
+      <span aria-live="polite" className="sr-only">
+        {TABS.find((t) => t.key === tab)?.label} 탭
+      </span>
       {/* 상단 바 */}
       <header className="flex shrink-0 items-center justify-between gap-2">
         <Link href="/" className="font-pixel text-sm font-bold text-ink/55">
@@ -130,7 +153,13 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col md:col-span-3">
-          <DashboardTabs character={character} now={now} />
+          <DashboardTabs
+            character={character}
+            now={now}
+            tab={tab}
+            onTabChange={setTab}
+            scrollSignal={scrollSignal}
+          />
         </div>
       </div>
 
@@ -138,6 +167,7 @@ export default function DashboardPage() {
       <Toast />
       <OutcomeBurst />
       <BottomNav />
-    </main>
+      </main>
+    </DeviceShell>
   );
 }
