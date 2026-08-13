@@ -321,11 +321,22 @@ export function rollMarriage(c: Character, age: number, r: number): boolean {
   return r < 0.18;
 }
 
-/** 출산 조건: 기혼 1년+ · 45세 이하 · 자녀 2명 미만 → 연 28% */
+/**
+ * 출산 확률 — 기본 30%에서 무자녀(또는 마지막 출산 후) 해가 갈수록 +8%p, 상한 70%.
+ * 순수 고정 확률(구 28%)은 운이 나쁘면 평생 무자녀로 2세대 플레이가 잠기는 꼬리가 있어,
+ * 기다린 햇수만큼 확률이 쌓이는 방식으로 교체(5년 내 무자녀 확률 약 4%).
+ */
+export function childbirthChance(c: Character, age: number): number {
+  const anchor = Math.max(c.marriedAtAge ?? 0, ...(c.childrenBornAges ?? [0]));
+  const waited = Math.max(0, age - anchor - 1); // 첫 판정 해 = 0
+  return Math.min(0.3 + waited * 0.08, 0.7);
+}
+
+/** 출산 조건: 기혼 1년+ · 45세 이하 · 자녀 2명 미만 → childbirthChance(연 30%~70%) */
 export function rollChildbirth(c: Character, age: number, r: number): boolean {
   if (c.marriedAtAge == null) return false;
   if (age > 45) return false;
   if ((c.childrenBornAges ?? []).length >= MAX_CHILDREN) return false;
   if (age - c.marriedAtAge < 1) return false;
-  return r < 0.28;
+  return r < childbirthChance(c, age);
 }

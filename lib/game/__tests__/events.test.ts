@@ -8,6 +8,7 @@ import { createCharacter } from "@/lib/game/character";
 import {
   MAX_CHILDREN,
   YEARLY_EVENT_CHANCE,
+  childbirthChance,
   rollChildbirth,
   rollMarriage,
   rollYearlyEvent,
@@ -149,9 +150,25 @@ describe("rollChildbirth", () => {
   // 조건 충족 기준: 28세 결혼 · 현재 30세 · 자녀 없음
   const ok = () => makeChar({ marriedAtAge: 28 });
 
-  it("모든 조건 충족 + r < 0.28 이면 true, r >= 0.28 이면 false", () => {
-    expect(rollChildbirth(ok(), 30, 0.27)).toBe(true);
-    expect(rollChildbirth(ok(), 30, 0.28)).toBe(false); // 확률 경계(>=)
+  it("첫 판정 해(결혼 1년차)는 30% — r < 0.3 true, r >= 0.3 false", () => {
+    const first = makeChar({ marriedAtAge: 28 });
+    expect(rollChildbirth(first, 29, 0.29)).toBe(true);
+    expect(rollChildbirth(first, 29, 0.3)).toBe(false); // 확률 경계(>=)
+  });
+
+  it("무자녀 해가 갈수록 확률이 +8%p씩 오르고 70%에서 멈춘다", () => {
+    const c = ok(); // 28세 결혼
+    expect(childbirthChance(c, 29)).toBeCloseTo(0.3); // 1년차
+    expect(childbirthChance(c, 30)).toBeCloseTo(0.38); // 2년차
+    expect(childbirthChance(c, 31)).toBeCloseTo(0.46); // 3년차
+    expect(childbirthChance(c, 34)).toBeCloseTo(0.7); // 6년차 = 상한
+    expect(childbirthChance(c, 40)).toBeCloseTo(0.7); // 상한 유지
+  });
+
+  it("둘째는 첫째 출산 시점 기준으로 30%부터 다시 시작한다", () => {
+    const c = makeChar({ marriedAtAge: 28, childrenBornAges: [33] });
+    expect(childbirthChance(c, 34)).toBeCloseTo(0.3); // 출산 이듬해
+    expect(childbirthChance(c, 36)).toBeCloseTo(0.46); // 출산 +3년
   });
 
   it("미혼이면 false", () => {
