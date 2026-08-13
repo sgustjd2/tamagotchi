@@ -16,6 +16,7 @@ import { useNow } from "@/lib/hooks/useNow";
 import { formatDuration } from "@/lib/utils";
 import { PixelRoom } from "@/components/game/PixelRoom";
 import { PixelCharacter } from "@/components/game/PixelCharacter";
+import { DioramaCard } from "@/components/three/DioramaCard";
 import { CharacterSpeechBubble } from "@/components/game/CharacterSpeechBubble";
 import { CharacterStatusIcon } from "@/components/game/CharacterStatusIcon";
 import {
@@ -57,6 +58,17 @@ export function CharacterAvatar({ character }: { character: Character }) {
   const toggleColorMode = () =>
     setColorMode((v) => {
       localStorage.setItem("lifegotchi:colorMode", v ? "0" : "1");
+      return !v;
+    });
+
+  // 🧊 3D 복셀 방 — 기본 켬. WebGL 미지원이면 자동으로 2D 픽셀 방으로 폴백
+  const [mode3d, setMode3d] = useState(false); // SSR 은 2D로 시작(하이드레이션 안전)
+  useEffect(() => {
+    setMode3d(localStorage.getItem("lifegotchi:room3d") !== "0");
+  }, []);
+  const toggleMode3d = () =>
+    setMode3d((v) => {
+      localStorage.setItem("lifegotchi:room3d", v ? "0" : "1");
       return !v;
     });
 
@@ -103,44 +115,65 @@ export function CharacterAvatar({ character }: { character: Character }) {
             />
           </div>
         )}
-        <PixelRoom
-          stage={character.lifeStage}
-          jobType={jobType}
-          night={night}
-          sky={sky}
-          season={season}
-          pet={pet}
-          family={family}
-          items={character.roomItems}
-          width={250}
-        >
-          <PixelCharacter
-            lifeStage={character.lifeStage}
-            mood={character.status.mood}
-            hunger={character.status.hunger}
-            energy={character.status.energy}
-            health={character.status.health}
-            burnout={character.status.burnout}
-            cleanliness={character.status.cleanliness}
-            actionState={actionState}
-            jobType={jobType}
-            gender={character.gender}
-            appearance={character.appearance}
-            bodyShape={bodyShape}
-            wardrobe={equippedOf(character)}
-            palette={colorMode ? paletteForColor(character.color, vs.tone) : undefined}
-            size={128}
+        {mode3d ? (
+          <DioramaCard
+            stage={character.lifeStage}
+            color={character.color}
+            night={night}
+            items={character.roomItems}
+            onUnavailable={() => setMode3d(false)}
           />
-        </PixelRoom>
-        {/* 컬러/단색 토글 — 방 우상단 작은 버튼 */}
+        ) : (
+          <PixelRoom
+            stage={character.lifeStage}
+            jobType={jobType}
+            night={night}
+            sky={sky}
+            season={season}
+            pet={pet}
+            family={family}
+            items={character.roomItems}
+            width={250}
+          >
+            <PixelCharacter
+              lifeStage={character.lifeStage}
+              mood={character.status.mood}
+              hunger={character.status.hunger}
+              energy={character.status.energy}
+              health={character.status.health}
+              burnout={character.status.burnout}
+              cleanliness={character.status.cleanliness}
+              actionState={actionState}
+              jobType={jobType}
+              gender={character.gender}
+              appearance={character.appearance}
+              bodyShape={bodyShape}
+              wardrobe={equippedOf(character)}
+              palette={colorMode ? paletteForColor(character.color, vs.tone) : undefined}
+              size={128}
+            />
+          </PixelRoom>
+        )}
+        {/* 3D/2D 토글 — 방 좌상단 작은 버튼 */}
         <button
           type="button"
-          onClick={toggleColorMode}
-          className="absolute right-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
-          title={colorMode ? "단색 LCD로 보기" : "내 기기 색으로 칠하기"}
+          onClick={toggleMode3d}
+          className="absolute left-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
+          title={mode3d ? "2D 픽셀 방으로 보기" : "3D 복셀 방으로 보기"}
         >
-          {colorMode ? "🎨 컬러" : "▦ 단색"}
+          {mode3d ? "🧊 3D" : "▦ 2D"}
         </button>
+        {/* 컬러/단색 토글 — 2D 모드에서만 의미 있음 */}
+        {!mode3d && (
+          <button
+            type="button"
+            onClick={toggleColorMode}
+            className="absolute right-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
+            title={colorMode ? "단색 LCD로 보기" : "내 기기 색으로 칠하기"}
+          >
+            {colorMode ? "🎨 컬러" : "▦ 단색"}
+          </button>
+        )}
       </div>
 
       <div className="text-center">

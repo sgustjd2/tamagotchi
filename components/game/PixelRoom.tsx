@@ -56,7 +56,7 @@ export interface PixelRoomProps {
  * 성장 단계(테마)별 벽/바닥 톤 — 같은 LCD 감성 안에서 살짝만 톤을 틀어
  * "나이 들며 방이 바뀐다"는 느낌을 준다. 밤에는 공통 어두운 팔레트를 쓴다.
  */
-const THEME_TINT: Record<RoomTheme, Pick<RoomPalette, "wall" | "floor" | "floorLine">> = {
+export const THEME_TINT: Record<RoomTheme, Pick<RoomPalette, "wall" | "floor" | "floorLine">> = {
   nursery: { wall: "#F3EADB", floor: "#E2D4BE", floorLine: "#C6B498" },
   kidRoom: { wall: "#EDEFD3", floor: "#DADEB5", floorLine: "#BCC192" },
   studyRoom: { wall: "#E9EDD8", floor: "#D6DBBE", floorLine: "#B7BD9C" },
