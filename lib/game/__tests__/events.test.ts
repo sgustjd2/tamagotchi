@@ -9,6 +9,7 @@ import {
   MAX_CHILDREN,
   YEARLY_EVENT_CHANCE,
   childbirthChance,
+  marriageChance,
   rollChildbirth,
   rollMarriage,
   rollYearlyEvent,
@@ -120,9 +121,17 @@ describe("rollMarriage", () => {
   // 모든 조건 충족 기준 캐릭터: 미혼 · 30세 · 취업 · 행복 60
   const ok = () => makeChar({ job: JOB, happiness: 60 });
 
-  it("모든 조건 충족 + r < 0.18 이면 true, r >= 0.18 이면 false", () => {
-    expect(rollMarriage(ok(), 30, 0.17)).toBe(true);
-    expect(rollMarriage(ok(), 30, 0.18)).toBe(false); // 확률 경계(>=)
+  it("첫 해(26살)는 20% — r < 0.2 true, r >= 0.2 false", () => {
+    expect(rollMarriage(ok(), 26, 0.19)).toBe(true);
+    expect(rollMarriage(ok(), 26, 0.2)).toBe(false); // 확률 경계(>=)
+  });
+
+  it("나이가 들수록 확률이 +6%p씩 오르고 60%에서 멈춘다", () => {
+    expect(marriageChance(26)).toBeCloseTo(0.2);
+    expect(marriageChance(27)).toBeCloseTo(0.26);
+    expect(marriageChance(30)).toBeCloseTo(0.44);
+    expect(marriageChance(33)).toBeCloseTo(0.6); // 상한 도달
+    expect(marriageChance(45)).toBeCloseTo(0.6); // 상한 유지
   });
 
   it("이미 결혼했으면 false", () => {

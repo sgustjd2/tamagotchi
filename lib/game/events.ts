@@ -312,13 +312,23 @@ export function rollYearlyEvent(
 // 결혼·출산 — 일반 이벤트보다 우선 판정되는 마일스톤
 // ---------------------------------------------------------------------------
 
-/** 결혼 조건: 미혼 · 26~45세 · 취업 상태 · 행복도 55+ → 연 18% */
+/**
+ * 결혼 확률 — 26살 20%에서 해마다 +6%p, 33살부터 상한 60%.
+ * 고정 18%는 조건을 완벽히 유지해도 35살까지 미혼일 확률이 14%나 되고,
+ * 결혼이 출산→2세대의 관문이라 출산(childbirthChance)과 같은 누적 상승형으로 교체.
+ * 늦게 취업해도 나이 기준 보정이라 45살 컷오프 안에 충분히 결혼 가능.
+ */
+export function marriageChance(age: number): number {
+  return Math.min(0.2 + Math.max(0, age - 26) * 0.06, 0.6);
+}
+
+/** 결혼 조건: 미혼 · 26~45세 · 취업 상태 · 행복도 55+ → marriageChance(연 20%~60%) */
 export function rollMarriage(c: Character, age: number, r: number): boolean {
   if (c.marriedAtAge != null) return false;
   if (age < 26 || age > 45) return false;
   if (!c.job) return false;
   if (c.happiness < 55) return false;
-  return r < 0.18;
+  return r < marriageChance(age);
 }
 
 /**
