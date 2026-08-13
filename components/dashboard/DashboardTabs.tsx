@@ -51,14 +51,16 @@ export function DashboardTabs({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="grid shrink-0 grid-cols-4 gap-1.5">
+      {/* 탭 버튼 — 호버 시 살짝 앞으로 기울어지는 입체 카드 느낌(perspective 틸트) */}
+      <div className="grid shrink-0 grid-cols-4 gap-1.5 [perspective:500px]">
         {TABS.map((t) => (
           <button
             key={t.key}
             type="button"
             onClick={() => switchTab(t.key)}
             className={cn(
-              "toy-btn flex items-center justify-center gap-1 whitespace-nowrap px-1 py-2 font-pixel text-[11px] font-bold sm:gap-1.5 sm:text-xs",
+              "toy-btn flex items-center justify-center gap-1 whitespace-nowrap px-1 py-2 font-pixel text-[11px] font-bold transition-transform duration-150 sm:gap-1.5 sm:text-xs",
+              "hover:[transform:rotateX(10deg)_translateY(-2px)]",
               tab === t.key ? "bg-butter" : "bg-white",
             )}
           >
