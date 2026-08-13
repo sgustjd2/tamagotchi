@@ -121,6 +121,11 @@ export function CharacterAvatar({ character }: { character: Character }) {
             color={character.color}
             night={night}
             items={character.roomItems}
+            pose={vs.pose}
+            outfit={equippedOf(character).outfit ?? null}
+            accessory={equippedOf(character).accessory ?? null}
+            family={family}
+            pet={pet}
             onUnavailable={() => setMode3d(false)}
           />
         ) : (
