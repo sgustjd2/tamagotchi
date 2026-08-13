@@ -169,25 +169,38 @@ export function applyRaise(salary: number, pct: number): number {
   return Math.round((salary * (1 + pct / 100)) / 100) * 100;
 }
 
-/** 승진 점수 (PRD 15) */
+/**
+ * 승진 점수 (PRD 15) + 같은 직급 근속 보정.
+ * 스탯이 애매한 캐릭터가 만년 사원으로 고착되지 않게, 같은 직급에서
+ * 해를 넘길수록 +2/년(최대 +10) — 결혼/출산의 누적 상승형과 같은 패턴.
+ * reviewAge 생략 시 현재 나이 기준(WorkPanel 진행률 표시 경로).
+ */
 export function promotionScore(
   c: Character,
   recentEvalScore: number,
   counters: YearCounters,
   neutral = false,
+  reviewAge = c.ageYears,
 ): number {
   const sdev = Math.min(counters.selfDev / YEARLY_TARGETS.selfDev, 1) * 100;
+  const sinceAge = c.job?.promotedAtAge ?? c.job?.hiredAtAge ?? reviewAge;
+  const tenure = Math.min(10, Math.max(0, (reviewAge - sinceAge - 1) * 2));
   const raw =
     recentEvalScore * 0.35 +
     jobCoreStatAvg(c) * 0.25 +
     leadershipScore(c) * 0.15 +
     reputationScore(c) * 0.1 +
     sdev * 0.1 +
-    effStatus(c, neutral).health * 0.05;
+    effStatus(c, neutral).health * 0.05 +
+    tenure;
   return clamp(Math.round(raw), 0, 100);
 }
 
-/** 승진 보류 사유 (있으면 보류) — PRD 15 */
+/**
+ * 승진 보류 사유 (있으면 보류) — PRD 15.
+ * C등급은 보류에서 제외 — 평가는 승진 점수의 35%로 이미 반영되는데
+ * C까지 무조건 보류하면 이중 처벌이라 보통 캐릭터가 영구 정체됐음. D만 보류.
+ */
 export function promotionHold(
   c: Character,
   thisGrade: ReviewGrade,
@@ -196,7 +209,7 @@ export function promotionHold(
 ): string[] {
   const s = effStatus(c, neutral);
   const reasons: string[] = [];
-  if (thisGrade === "C" || thisGrade === "D") reasons.push("평가 부진");
+  if (thisGrade === "D") reasons.push("평가 부진");
   if (s.burnout > 85) reasons.push("번아웃");
   if (counters.selfDev === 0) reasons.push("자기개발 부족");
   if (s.health < 30) reasons.push("건강 악화");
@@ -229,7 +242,7 @@ export function processWorkReview(
 
   // 2) 승진 심사
   const reasons = promotionHold(c, grade, counters, neutral);
-  const pScore = promotionScore(c, evalScore, counters, neutral);
+  const pScore = promotionScore(c, evalScore, counters, neutral, reviewAge);
   const next = nextGrade(job.grade);
   const promoted =
     next != null && reasons.length === 0 && pScore >= PROMO_THRESHOLD[job.grade];
