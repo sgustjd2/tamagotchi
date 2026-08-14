@@ -80,6 +80,15 @@ body {
   .h-pix {
     @apply font-pixel;
   }
+
+  /* 기기 셸 LCD 안 스크롤 — 스크롤은 되지만 막대는 숨긴다(다마고치 화면 몰입감) */
+  .scroll-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* 픽셀 이미지/스프라이트는 또렷하게 */

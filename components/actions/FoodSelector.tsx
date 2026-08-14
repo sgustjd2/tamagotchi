@@ -106,7 +106,7 @@ export function FoodSelector({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="grid max-h-[58vh] grid-cols-2 gap-2.5 overflow-y-auto pr-0.5">
+            <div className="scroll-hide grid max-h-[58vh] grid-cols-2 gap-2.5 overflow-y-auto pr-0.5">
               {FOODS.map((f) => {
                 const cal = CALORIE_META[f.calorieTier];
                 const locked = !isStageUnlocked(f.minStage, character.lifeStage);

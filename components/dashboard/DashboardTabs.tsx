@@ -80,7 +80,7 @@ export function DashboardTabs({
         ))}
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pb-2">
+      <div ref={scrollRef} className="scroll-hide min-h-0 flex-1 overflow-y-auto pb-2">
         <div className={panelCls("care")}>
           <StudyCard character={character} now={now} />
           <div className="card p-4">
