@@ -128,12 +128,12 @@ export default function DashboardPage() {
       </div>
 
       {/* 위(모바일)/왼쪽(데스크톱): 캐릭터 방 — 아래/오른쪽: 탭 패널 */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-2.5 md:grid-cols-5 md:gap-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_1fr] gap-1.5 md:grid-cols-5 md:grid-rows-1 md:gap-4">
         <div className="flex min-h-0 shrink-0 flex-col md:col-span-2">
-          <div className="scroll-hide card flex min-h-0 flex-col items-center overflow-y-auto p-3 md:flex-1 md:p-5">
+          <div className="scroll-hide card flex min-h-0 flex-col items-center p-2 sm:p-3 md:flex-1 md:overflow-y-auto md:p-5">
             <CharacterAvatar character={character} />
             {/* 상시 컨디션 — 탭을 오가지 않아도 케어 판단이 가능하게, 전체 지표를 여기 한 곳에 */}
-            <div className="mt-2 grid w-full max-w-[300px] shrink-0 grid-cols-2 gap-x-4 gap-y-1.5">
+            <div className="mt-2 hidden w-full max-w-[300px] shrink-0 grid-cols-2 gap-x-4 gap-y-1.5 md:grid">
               <StatBar label="배고픔" value={character.status.hunger} />
               <StatBar label="체력" value={character.status.energy} />
               <StatBar label="기분" value={character.status.mood} />

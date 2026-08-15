@@ -104,9 +104,9 @@ export function CharacterAvatar({ character }: { character: Character }) {
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-2 md:gap-3">
+    <div className="flex w-full flex-col items-center gap-1 sm:gap-2 md:gap-3">
       {/* 모바일은 한 화면 레이아웃에 맞춰 방을 조금 작게(높이 절약) */}
-      <div className="relative w-full max-w-[190px] md:max-w-[250px]">
+      <div className="relative w-full max-w-[160px] sm:max-w-[190px] md:max-w-[250px]">
         {showBubble && (
           <div className="absolute -top-2 left-1/2 z-10 -translate-x-1/2">
             <CharacterSpeechBubble
@@ -197,7 +197,7 @@ export function CharacterAvatar({ character }: { character: Character }) {
             다음 생일까지 {formatDuration(msToNextAge)}
           </div>
         )}
-        <div className="mt-1.5 flex flex-wrap justify-center gap-2">
+        <div className="mt-1 flex flex-wrap justify-center gap-1.5 sm:mt-1.5 sm:gap-2">
           <span className={`pill ${female ? "bg-blush/50" : "bg-sky/40"} text-ink/70`}>
             {female ? "♀ 여아" : "♂ 남아"} · {currentHeight(character)}cm
           </span>
