@@ -19,8 +19,15 @@ export function ScrollIntro({
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.innerWidth < 768) return;
-    setActive(true);
+    const mql = window.matchMedia("(min-width: 768px)");
+    const onChange = () => setActive(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
@@ -38,7 +45,7 @@ export function ScrollIntro({
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [active]);
 
   // 카메라: 접근(0.65→1.35) 후 안착(→1). 콘텐츠는 후반부에 떠오른다
   const scale = p < 0.5 ? 0.65 + p * 1.4 : 1.35 - (p - 0.5) * 0.7;
