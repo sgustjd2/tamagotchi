@@ -75,10 +75,11 @@ export function rollLifeRisk(
   if (rFatal < fatalChance) {
     return { kind: "death", cause: age >= 52 ? "지병" : inc.cause };
   }
-  // 단련된 몸(지구력+근력 평균)은 사고 피해를 줄인다 — 최대 40% 경감
+  // 단련된 몸(지구력+근력 평균 + 체력단련 습관 누적)은 사고 피해를 줄인다 — 최대 40% 경감
   const toughness = Math.min(
     0.4,
-    ((clamp(c.stats.stamina ?? 0, 0, 100) + clamp(c.stats.strength ?? 0, 0, 100)) / 2) * 0.004,
+    ((clamp(c.stats.stamina ?? 0, 0, 100) + clamp(c.stats.strength ?? 0, 0, 100)) / 2) * 0.004 +
+      clamp(c.stats.fitness ?? 0, 0, 100) * 0.001,
   );
   return { kind: "incident", cause: inc.cause, healthHit: Math.round(inc.hit * (1 - toughness)) };
 }

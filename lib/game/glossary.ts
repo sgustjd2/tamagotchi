@@ -43,12 +43,12 @@ export const STATUS_GLOSSARY: GlossaryEntry[] = [
   {
     key: "sleepQuality",
     label: "수면 질",
-    desc: "연간 결산 점수에 반영돼요. 규칙적으로 재워 주면 올라가요.",
+    desc: "80을 넘으면 공부·업무 효율 +10%, 25 미만이면 효율이 떨어져요. 연간 결산에도 반영돼요.",
   },
   {
     key: "confidence",
     label: "자신감",
-    desc: "칭찬·운동·성취로 올라가요. 연간 결산 등급이 좋으면 함께 올라요.",
+    desc: "칭찬·운동·성취로 올라가요. 연봉협상 성공률을 ±10% 보정해요.",
   },
   {
     key: "stress",
@@ -107,7 +107,7 @@ export const STAT_GLOSSARY: GlossaryEntry[] = [
   {
     key: "fitness",
     label: "체력단련",
-    desc: "운동 습관의 누적치예요. 꾸준히 운동할수록 쌓여요.",
+    desc: "운동 습관의 누적치예요. 쌓일수록 사고 피해 경감에 보태지고, 일부 직군의 핵심 역량이에요.",
   },
   {
     key: "careerPotential",
