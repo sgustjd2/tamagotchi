@@ -74,7 +74,7 @@ export default function CreatePage() {
           </p>
           <Link
             href="/dashboard"
-            className="toy-btn mt-5 block w-full bg-coral text-white shadow-soft"
+            className="toy-btn mt-5 block w-full bg-coral text-ink shadow-soft"
           >
             이어서 키우기 →
           </Link>
@@ -128,7 +128,7 @@ export default function CreatePage() {
           onChange={(e) => setName(e.target.value)}
           maxLength={12}
           placeholder="예: 콩이"
-          className="mt-1.5 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base outline-none focus:border-coral"
+          className="mt-1.5 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base outline-none focus:border-coral focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-ink"
         />
         <p className="mt-1 text-[11px] text-ink/40">
           실명·개인정보가 담긴 이름은 피해 주세요. 랭킹엔 닉네임만 표시돼요.
@@ -182,7 +182,7 @@ export default function CreatePage() {
         <button
           type="button"
           onClick={handleStart}
-          className="toy-btn mt-7 w-full bg-coral text-white"
+          className="toy-btn mt-7 w-full bg-coral text-ink"
         >
           키우기 시작!
         </button>

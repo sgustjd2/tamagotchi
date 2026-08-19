@@ -149,7 +149,7 @@ export function EndingScreen({ character }: { character: Character }) {
               인생 랭킹
             </span>
             {newBest && (
-              <span className="pill bg-grape text-white">
+              <span className="pill bg-grape text-ink">
                 {newBest === "first" ? "첫 기록!" : "역대 최고 경신!"}
               </span>
             )}
@@ -197,7 +197,7 @@ export function EndingScreen({ character }: { character: Character }) {
           <button
             type="button"
             onClick={continueAsChild}
-            className="toy-btn mt-3 w-full bg-grape text-white"
+            className="toy-btn mt-3 w-full bg-grape text-ink"
           >
             👨‍👧 2세대로 이어가기 (유산 {formatMoney(inheritanceAmount(character))})
           </button>
@@ -206,7 +206,7 @@ export function EndingScreen({ character }: { character: Character }) {
         <button
           type="button"
           onClick={restart}
-          className="toy-btn mt-3 w-full bg-coral text-white"
+          className="toy-btn mt-3 w-full bg-coral text-ink"
         >
           다시 태어나기
         </button>

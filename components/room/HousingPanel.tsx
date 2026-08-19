@@ -93,7 +93,7 @@ export function HousingPanel({ character }: { character: Character }) {
                   className={cn(
                     "pill shrink-0 font-bold transition-colors",
                     plan.ok
-                      ? "bg-grape text-white hover:brightness-105"
+                      ? "bg-grape text-ink hover:brightness-105"
                       : "cursor-not-allowed bg-black/10 text-ink/40",
                   )}
                 >

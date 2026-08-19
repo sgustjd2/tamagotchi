@@ -14,7 +14,7 @@ export function StartCta() {
   return (
     <Link
       href={href}
-      className="toy-btn inline-block bg-coral px-8 py-4 text-lg text-white shadow-toy hover:-translate-y-0.5"
+      className="toy-btn inline-block bg-coral px-8 py-4 text-lg text-ink shadow-toy hover:-translate-y-0.5"
     >
       {label}
     </Link>

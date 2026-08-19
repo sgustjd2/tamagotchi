@@ -38,7 +38,7 @@ export function NegotiateCard({ character }: { character: Character }) {
           <button
             type="button"
             onClick={() => negotiateSalary()}
-            className="toy-btn mt-4 w-full bg-grape text-white"
+            className="toy-btn mt-4 w-full bg-grape text-ink"
           >
             연봉협상 시도 (예상 +3~9%)
           </button>

@@ -30,7 +30,7 @@ function effectHint(status?: StatusDelta): string {
 const CALORIE_META: Record<CalorieTier, { label: string; cls: string }> = {
   low: { label: "저칼로리", cls: "bg-mint/50 text-ink/70" },
   medium: { label: "보통", cls: "bg-butter/60 text-ink/70" },
-  high: { label: "고칼로리", cls: "bg-coral/70 text-white" },
+  high: { label: "고칼로리", cls: "bg-coral/70 text-ink" },
 };
 
 export function FoodSelector({

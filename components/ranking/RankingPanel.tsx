@@ -98,7 +98,7 @@ export function RankingPanel({ character }: { character: Character }) {
                         {e.name}
                       </span>
                       {me && (
-                        <span className="pill bg-grape text-white">이번 생</span>
+                        <span className="pill bg-grape text-ink">이번 생</span>
                       )}
                     </div>
                     <div className="font-pixel text-[10px] text-ink/45">

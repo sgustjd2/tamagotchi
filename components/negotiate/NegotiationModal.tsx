@@ -19,7 +19,7 @@ const META = {
   backfire: {
     title: "괘씸죄…",
     icon: "bolt",
-    badge: "bg-coral text-white",
+    badge: "bg-coral text-ink",
     body: "무리한 요구가 안 좋은 인상을 남겼어요. 다음 평가에 살짝 불리해요.",
   },
 } as const;
@@ -69,7 +69,7 @@ export function NegotiationModal() {
         <button
           type="button"
           onClick={ack}
-          className="toy-btn mt-5 w-full bg-coral text-white"
+          className="toy-btn mt-5 w-full bg-coral text-ink"
         >
           확인
         </button>

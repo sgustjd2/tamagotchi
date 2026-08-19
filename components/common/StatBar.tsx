@@ -8,9 +8,9 @@ interface StatBarProps {
 
 function tone(value: number, higherIsBetter: boolean): string {
   const good = higherIsBetter ? value : 100 - value;
-  if (good >= 60) return "bg-mint";
-  if (good >= 30) return "bg-butter";
-  return "bg-coral";
+  if (good >= 60) return "bg-gauge-good";
+  if (good >= 30) return "bg-gauge-warn";
+  return "bg-gauge-bad";
 }
 
 export function StatBar({ label, value, higherIsBetter = true }: StatBarProps) {

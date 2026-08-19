@@ -79,7 +79,7 @@ function GradEnrollCta({
         type="button"
         disabled={!adm.ok}
         onClick={() => onEnroll()}
-        className="toy-btn mt-3 w-full bg-grape text-white disabled:bg-black/10 disabled:text-ink/40"
+        className="toy-btn mt-3 w-full bg-grape text-ink disabled:bg-black/10 disabled:text-ink/40"
       >
         {adm.ok ? `${DEGREE_LABEL[t]} 진학하기` : adm.reason}
       </button>

@@ -287,7 +287,7 @@ export default function CareerPage() {
         type="button"
         disabled={!canApply}
         onClick={() => family && company && applyForJob(family, company)}
-        className="toy-btn w-full bg-coral text-white disabled:bg-black/10 disabled:text-ink/40"
+        className="toy-btn w-full bg-coral text-ink disabled:bg-black/10 disabled:text-ink/40"
       >
         {onApplyCooldown
           ? "잠시 후 다시 지원할 수 있어요"

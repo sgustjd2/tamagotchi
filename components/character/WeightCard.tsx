@@ -26,7 +26,7 @@ export function WeightCard({ character }: { character: Character }) {
   const hiPct = ((hi - min) / (max - min)) * 100;
 
   const verdictColor =
-    v === "healthy" ? "bg-mint text-ink" : v === "high" ? "bg-coral text-white" : "bg-sky text-ink";
+    v === "healthy" ? "bg-mint text-ink" : v === "high" ? "bg-coral text-ink" : "bg-sky text-ink";
 
   return (
     <div className="card p-4">

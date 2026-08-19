@@ -23,7 +23,7 @@ export function JobResultModal() {
         <div className="flex flex-col items-center text-center">
           <div
             className={`flex h-16 w-16 items-center justify-center rounded-2xl border-[3px] border-ink ${
-              result.success ? "bg-mint" : "bg-coral text-white"
+              result.success ? "bg-mint" : "bg-coral text-ink"
             }`}
           >
             <PixelIcon name={result.success ? "briefcase" : "speech"} size={30} />
@@ -55,7 +55,7 @@ export function JobResultModal() {
         <button
           type="button"
           onClick={ack}
-          className="toy-btn mt-5 w-full bg-coral text-white"
+          className="toy-btn mt-5 w-full bg-coral text-ink"
         >
           확인
         </button>

@@ -5,6 +5,8 @@
 :root {
   --bg: #fff8f0;
   --ink: #2e2722;
+  /* 라이트 단일 테마 선언 — Android WebView 강제 다크닝 방지 */
+  color-scheme: light;
 }
 
 html,

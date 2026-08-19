@@ -19,6 +19,12 @@ const config: Config = {
         coral: "#FF9A8B",
         lcd: "#E5EAD2", // 다마고치 LCD 화면 (연한 크림-그린)
         lcdink: "#3A2E22", // 진한 갈색
+        // 게이지 전용 — 파스텔 표면색은 트랙과 대비(1.1:1)가 안 나와 게이지엔 쓰지 않는다
+        gauge: {
+          good: "#3FA96F",
+          warn: "#E0A428",
+          bad: "#D9472E",
+        },
       },
       fontFamily: {
         sans: [
