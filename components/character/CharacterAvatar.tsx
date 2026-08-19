@@ -213,7 +213,10 @@ export function CharacterAvatar({ character }: { character: Character }) {
           </span>
           <span className="pill bg-blush/40 text-ink/70">행복 {character.happiness}</span>
           {(character.generation ?? 1) >= 2 && (
-            <span className="pill bg-grape/25 text-ink/70">{character.generation}세대</span>
+            <span className="pill bg-grape/40 text-ink/70">
+              👨‍👧 {character.generation}세대
+              {character.legacy ? ` · ${character.legacy.parentName}의 자녀` : ""}
+            </span>
           )}
           {character.marriedAtAge != null && (
             <span className="pill bg-coral/20 text-ink/70">

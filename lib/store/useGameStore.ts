@@ -100,8 +100,10 @@ import {
 import { wardrobeDef } from "@/lib/game/wardrobe";
 import { applyMove, housingDef, planMove } from "@/lib/game/housing";
 import {
+  applyStartingHousing,
   canStartSecondGen,
   inheritanceAmount,
+  inheritedItems,
   inheritedStatBonus,
   nextGenName,
 } from "@/lib/game/legacy";
@@ -165,7 +167,8 @@ interface GameState {
   };
   equipWardrobe: (kind: "outfit" | "accessory", key: WardrobeItemKey | null) => ActionResult;
   moveHousing: (key: HousingOptionKey) => ActionResult;
-  startSecondGeneration: () => ActionResult;
+  /** housingKey 를 주면 유산으로 감당 가능한 경우 그 집에서 시작(기본: 본가) */
+  startSecondGeneration: (housingKey?: HousingOptionKey) => ActionResult;
 }
 
 const now = () => Date.now();
@@ -906,7 +909,7 @@ export const useGameStore = create<GameState>()(
         return { ok: true, message: "이사 완료" };
       },
 
-      startSecondGeneration: () => {
+      startSecondGeneration: (housingKey) => {
         const c = get().character;
         if (!c) return { ok: false, message: "캐릭터가 없어요." };
         if (!canStartSecondGen(c)) {
@@ -916,13 +919,19 @@ export const useGameStore = create<GameState>()(
         const inherited = inheritanceAmount(c);
         const gender: Gender = Math.random() < 0.5 ? "male" : "female";
         const base = createCharacter(userId, nextGenName(c), c.color, gender, now());
-        const child: Character = {
+        // 유품: 부모가 쓰던 옷·방 아이템 각각 2~3개
+        const heirloom = inheritedItems(c, Math.random);
+        let child: Character = {
           ...base,
           savings: inherited,
           stats: { ...base.stats, ...inheritedStatBonus(c.stats) },
           generation: (c.generation ?? 1) + 1,
           legacy: { parentName: c.name, inheritedManwon: inherited },
+          wardrobe: heirloom.wardrobe,
+          roomItems: heirloom.roomItems,
         };
+        // 시작 주거: 유산으로 전액 감당 가능한 경우에만 적용(대출 없음)
+        if (housingKey) child = applyStartingHousing(child, housingKey);
         set({
           character: child,
           pendingReviews: [],
@@ -930,8 +939,11 @@ export const useGameStore = create<GameState>()(
           negotiationResult: null,
           toast: null,
         });
+        const itemCount = heirloom.wardrobe.length + heirloom.roomItems.length;
         pushToast(
-          `👶 ${child.name} 탄생! ${c.name}의 유산 ${formatMoney(inherited)}과 재능을 물려받았어요.`,
+          `👶 ${child.name} 탄생! ${c.name}의 유산 ${formatMoney(inherited)}과 재능${
+            itemCount > 0 ? `, 유품 ${itemCount}개` : ""
+          }를 물려받았어요.`,
         );
         return { ok: true, message: "2세대 시작" };
       },

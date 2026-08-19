@@ -76,7 +76,12 @@ export function WardrobePanel({ character }: { character: Character }) {
                         <div className="truncate text-[11px] text-ink/50">{w.desc}</div>
                       </div>
                     </div>
-                    {owned ? (
+                    {owned && character.ageYears < w.minAge ? (
+                      // 유품으로 물려받은 옷은 나이 게이트를 건너뛸 수 있어 여기서 막는다
+                      <span className="pill shrink-0 bg-butter/50 text-ink/60">
+                        유품 · {w.minAge}살부터
+                      </span>
+                    ) : owned ? (
                       <button
                         type="button"
                         onClick={() => equipWardrobe(kind, isOn ? null : w.key)}
