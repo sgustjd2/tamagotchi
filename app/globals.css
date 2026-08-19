@@ -83,6 +83,20 @@ body {
     @apply font-pixel;
   }
 
+  /* 터치 타깃 44px 보강 — 시각 크기는 유지하고 히트 영역만 넓힌다 */
+  .tap-44 {
+    position: relative;
+  }
+  .tap-44::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+
   /* 기기 셸 LCD 안 스크롤 — 스크롤은 되지만 막대는 숨긴다(다마고치 화면 몰입감) */
   .scroll-hide {
     scrollbar-width: none;

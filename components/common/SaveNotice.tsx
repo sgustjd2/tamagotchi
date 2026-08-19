@@ -36,7 +36,7 @@ export function SaveNotice() {
       <button
         type="button"
         onClick={dismiss}
-        className="rounded-full p-1 hover:bg-black/5"
+        className="tap-44 rounded-full p-1 hover:bg-black/5"
         aria-label="닫기"
       >
         <X className="h-4 w-4" />

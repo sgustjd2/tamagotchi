@@ -138,7 +138,7 @@ export function StudyCard({
         <button
           type="button"
           onClick={() => cancelStudy()}
-          className="mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/50 hover:bg-black/5"
+          className="tap-44 mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/50 hover:bg-black/5"
         >
           공부 중단
         </button>

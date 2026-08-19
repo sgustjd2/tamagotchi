@@ -83,7 +83,7 @@ export default function CreatePage() {
             onClick={() => {
               if (confirm("정말 새로 시작할까요? 지금 캐릭터는 사라져요.")) reset();
             }}
-            className="mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/45 hover:bg-black/5"
+            className="tap-44 mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/45 hover:bg-black/5"
           >
             처음부터 새로 시작
           </button>
@@ -117,7 +117,7 @@ export default function CreatePage() {
         <button
           type="button"
           onClick={() => setAppearance(rollAppearance())}
-          className="mx-auto mb-1 flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-white px-3 py-1.5 font-pixel text-[11px] font-bold text-ink/60 hover:border-ink/40"
+          className="tap-44 mx-auto mb-1 flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-white px-3 py-1.5 font-pixel text-[11px] font-bold text-ink/60 hover:border-ink/40"
         >
           🎲 다른 스타일 뽑기
         </button>

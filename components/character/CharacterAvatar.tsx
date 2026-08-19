@@ -166,7 +166,7 @@ export function CharacterAvatar({ character }: { character: Character }) {
         <button
           type="button"
           onClick={toggleMode3d}
-          className="absolute left-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
+          className="tap-44 absolute left-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
           title={mode3d ? "2D 픽셀 방으로 보기" : "3D 복셀 방으로 보기"}
         >
           {mode3d ? "🧊 3D" : "▦ 2D"}
@@ -176,7 +176,7 @@ export function CharacterAvatar({ character }: { character: Character }) {
           <button
             type="button"
             onClick={toggleColorMode}
-            className="absolute right-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
+            className="tap-44 absolute right-1.5 top-1.5 z-10 rounded-lg border-2 border-ink/25 bg-white/80 px-1.5 py-0.5 font-pixel text-[10px] font-bold text-ink/60 hover:bg-white"
             title={colorMode ? "단색 LCD로 보기" : "내 기기 색으로 칠하기"}
           >
             {colorMode ? "🎨 컬러" : "▦ 단색"}

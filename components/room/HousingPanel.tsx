@@ -91,7 +91,7 @@ export function HousingPanel({ character }: { character: Character }) {
                   onClick={() => moveHousing(opt.key)}
                   disabled={!plan.ok}
                   className={cn(
-                    "pill shrink-0 font-bold transition-colors",
+                    "tap-44 pill shrink-0 font-bold transition-colors",
                     plan.ok
                       ? "bg-grape text-ink hover:brightness-105"
                       : "cursor-not-allowed bg-black/10 text-ink/40",

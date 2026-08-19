@@ -50,7 +50,7 @@ export function FirstVisitGuide() {
         <button
           type="button"
           onClick={dismiss}
-          className="-m-1 rounded-full p-1 hover:bg-black/5"
+          className="tap-44 -m-1 rounded-full p-1 hover:bg-black/5"
           aria-label="가이드 닫기"
         >
           <X className="h-4 w-4" />

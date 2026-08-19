@@ -81,7 +81,7 @@ export function WardrobePanel({ character }: { character: Character }) {
                         type="button"
                         onClick={() => equipWardrobe(kind, isOn ? null : w.key)}
                         className={cn(
-                          "pill shrink-0 font-bold transition-colors",
+                          "tap-44 pill shrink-0 font-bold transition-colors",
                           isOn
                             ? "bg-mint text-ink"
                             : "bg-white text-ink/60 hover:bg-cream",
