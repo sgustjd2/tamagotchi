@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BottomNav } from "@/components/common/BottomNav";
 import { SaveBackup } from "@/components/common/SaveBackup";
 import { NEGLECT_DEATH_MS } from "@/lib/game/constants";
+import { STAT_GLOSSARY, STATUS_GLOSSARY } from "@/lib/game/glossary";
 
 const NEGLECT_HOURS = NEGLECT_DEATH_MS / 3_600_000;
 
@@ -110,6 +111,33 @@ export default function HelpPage() {
           </section>
         ))}
       </div>
+
+      {/* 지표 사전 — 컨디션·스탯 정의(단일 출처: lib/game/glossary.ts) */}
+      <section className="card mt-3 p-4">
+        <h2 className="mb-2 font-pixel text-sm font-bold text-ink/80">
+          📖 지표 사전
+        </h2>
+        <h3 className="font-pixel text-xs font-bold text-ink/60">
+          컨디션 — 시간이 흐르면 줄고, 케어로 회복
+        </h3>
+        <ul className="mt-1.5 flex flex-col gap-1.5">
+          {STATUS_GLOSSARY.map((g) => (
+            <li key={g.key} className="text-[13px] leading-relaxed text-ink/70">
+              <b className="font-pixel text-ink/80">{g.label}</b> — {g.desc}
+            </li>
+          ))}
+        </ul>
+        <h3 className="mt-3 font-pixel text-xs font-bold text-ink/60">
+          능력치 — 레벨업 포인트 배분·행동으로 성장
+        </h3>
+        <ul className="mt-1.5 flex flex-col gap-1.5">
+          {STAT_GLOSSARY.map((g) => (
+            <li key={g.key} className="text-[13px] leading-relaxed text-ink/70">
+              <b className="font-pixel text-ink/80">{g.label}</b> — {g.desc}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <div className="mt-3">
         <SaveBackup />
