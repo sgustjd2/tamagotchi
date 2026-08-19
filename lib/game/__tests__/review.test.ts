@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { ActionEffect } from "@/types/action";
 import type { Character, YearCounters } from "@/types/character";
 import { createCharacter } from "@/lib/game/character";
-import { GAME_YEAR_MS, YEARLY_TARGETS } from "@/lib/game/constants";
+import { getAction } from "@/lib/game/actions";
+import { COOLDOWN_SCALE, GAME_YEAR_MS, YEARLY_TARGETS } from "@/lib/game/constants";
 import {
   gradeOf,
   mergeEffect,
@@ -50,6 +51,20 @@ describe("scoreYear", () => {
   it("목표 초과 달성해도 항목 점수는 100으로 캡", () => {
     const doubled = { ...ZERO, study: YEARLY_TARGETS.study * 2 };
     expect(scoreYear(doubled, baseStatus, 10, { neutralStatus: true })).toBe(38);
+  });
+
+  it("baby 단계는 잠긴 활동(공부·자기개발·운동)을 빼고 재정규화 — 만점 케어면 S", () => {
+    const counters: YearCounters = { ...ZERO, meals: YEARLY_TARGETS.meals };
+    const status = { ...baseStatus, health: 100, sleepQuality: 100, stress: 0 };
+    expect(scoreYear(counters, status, 1, { stage: "baby" })).toBeGreaterThanOrEqual(85);
+    // stage 없이 호출하면 기존 전체 가중 채점 유지(호환)
+    expect(scoreYear(counters, status, 1)).toBeLessThan(85);
+  });
+
+  it("meals 목표는 feed 쿨타임상 1년 안에 물리적으로 달성 가능해야 한다", () => {
+    const feedCd = Math.round(getAction("feed")!.cooldownMs * COOLDOWN_SCALE);
+    const maxPerYear = Math.floor(GAME_YEAR_MS / feedCd);
+    expect(YEARLY_TARGETS.meals).toBeLessThanOrEqual(maxPerYear);
   });
 });
 

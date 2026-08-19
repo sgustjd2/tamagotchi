@@ -136,7 +136,7 @@ export function scoreYear(
   counters: YearCounters,
   status: CharacterStatus,
   age: number,
-  opts?: { neutralStatus?: boolean },
+  opts?: { neutralStatus?: boolean; stage?: LifeStage },
 ): number {
   const T = YEARLY_TARGETS;
   const cap = (count: number, target: number) =>
@@ -152,16 +152,35 @@ export function scoreYear(
     : weightVerdict(status.weight, age) === "healthy"
       ? 100
       : 40;
-  const raw =
-    cap(counters.study, T.study) * 0.22 +
-    cap(counters.selfDev, T.selfDev) * 0.2 +
-    cap(counters.exercise, T.exercise) * 0.18 +
+  // 단계 인지 채점: 아직 해금되지 않은 활동은 가중치에서 빼고 남은 항목으로 재정규화.
+  // (아기 단계에서 잠긴 공부·자기개발·운동 60% 가중 때문에 만점 케어가 D등급이 되는 문제 방지)
+  // 해금 기준은 각 카운터를 올리는 가장 이른 액션: study/cardio(elementary), read(child).
+  const stage = opts?.stage;
+  const active = {
+    study: !stage || isActionUnlocked("study", stage),
+    selfDev: !stage || isActionUnlocked("read", stage),
+    exercise: !stage || isActionUnlocked("cardio", stage),
+  };
+  let raw =
     cap(counters.meals, T.meals) * 0.1 +
     health * 0.12 +
     sleep * 0.08 +
     (100 - stress) * 0.05 +
     weightScore * 0.05;
-  return clamp(Math.round(raw), 0, 100);
+  let weight = 0.4;
+  if (active.study) {
+    raw += cap(counters.study, T.study) * 0.22;
+    weight += 0.22;
+  }
+  if (active.selfDev) {
+    raw += cap(counters.selfDev, T.selfDev) * 0.2;
+    weight += 0.2;
+  }
+  if (active.exercise) {
+    raw += cap(counters.exercise, T.exercise) * 0.18;
+    weight += 0.18;
+  }
+  return clamp(Math.round(raw / weight), 0, 100);
 }
 
 export function gradeOf(score: number): ReviewGrade {
@@ -265,6 +284,7 @@ export function runDueReviews(
   } else {
     score = scoreYear(ch.yearCounters, ch.status, reviewAge, {
       neutralStatus: multiYear,
+      stage: reviewStage,
     });
     grade = gradeOf(score);
     let effect = reviewEffect(grade);

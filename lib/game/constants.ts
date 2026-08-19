@@ -343,7 +343,7 @@ export const YEARLY_TARGETS = {
   study: _per(12), // 공부: 세션+쿨타임 ≈ 실 12분
   selfDev: _per(12),
   exercise: _per(12),
-  meals: _per(6), // 식사는 더 자주
+  meals: _per(9), // 식사: feed 쿨타임(3h×COOLDOWN_SCALE=9분)상 한 해 1회가 물리적 최대
 };
 
 /** 오프라인 다년 방치 시 페널티 적용 상한 연수 */
@@ -351,10 +351,17 @@ export const MAX_NEGLECT_YEARS_APPLIED = 3;
 
 /**
  * 이 시간(ms) 이상 앱을 열지 않으면 방치 사망 처리.
- * 배고픔(초기 70) 기준: DECAY_PER_HOUR.hunger(-7) × DECAY_SCALE(3) = 21/h
- * → 70/21 ≈ 3.33시간에 배고픔 0. 약간 여유를 줘 4시간으로 설정.
+ * 도움말·엔딩 화면 문구가 모두 이 상수에서 파생된다(하드코딩 금지).
  */
-export const NEGLECT_DEATH_MS = 4 * 60 * 60 * 1000; // 현실 4시간 (배고픔 0 기준)
+export const NEGLECT_DEATH_MS = 8 * 60 * 60 * 1000; // 현실 8시간
+
+/**
+ * 오프라인 복귀 시 상태 감쇠 적용 상한(ms).
+ * 감쇠는 DECAY_PER_HOUR.hunger(-10) × DECAY_SCALE(3) = 30/h 라서 캡이 없으면
+ * 2~3시간 자리 비움만으로 배고픔 0 → 굶주림 즉사가 나온다(방치 사망 8시간 약속과 모순).
+ * 복귀 정산 감쇠를 이 값만큼으로 제한해, 오프라인엔 방치 사망 규칙만 남긴다.
+ */
+export const OFFLINE_DECAY_CAP_MS = 30 * 60 * 1000;
 
 /** 시험이 발생하는 학업 단계 */
 export const EDU_STAGES: LifeStage[] = [

@@ -10,6 +10,8 @@ import {
   isStudyReady,
 } from "@/lib/game/study";
 import { isActionReady } from "@/lib/game/engine";
+import { getAction } from "@/lib/game/actions";
+import { COOLDOWN_SCALE } from "@/lib/game/constants";
 import {
   isActionUnlocked,
   studyContentForStage,
@@ -17,6 +19,12 @@ import {
 } from "@/lib/game/gating";
 import { formatDuration } from "@/lib/utils";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
+
+// 실제 세션 길이(초) — 표시 문구는 항상 여기서 파생(하드코딩 "30분" 금지)
+const STUDY_SESSION_SEC = Math.round(
+  ((getAction("study")?.sessionMs ?? 30 * 60 * 1000) * COOLDOWN_SCALE) / 1000,
+);
+const PERFECT_SEC = Math.round(STUDY_PERFECT_WINDOW_MS / 1000);
 
 export function StudyCard({
   character,
@@ -91,10 +99,13 @@ export function StudyCard({
           onClick={() => startStudy()}
           className="toy-btn mt-3 w-full bg-sky text-ink disabled:bg-black/10 disabled:text-ink/40"
         >
-          {ready ? "공부 시작 · 30분 집중" : `쿨타임 ${formatDuration(remaining)}`}
+          {ready
+            ? `공부 시작 · ${STUDY_SESSION_SEC}초 집중`
+            : `쿨타임 ${formatDuration(remaining)}`}
         </button>
         <p className="mt-2 text-center text-[11px] text-ink/50">
-          시작 후 30분이 지나면 완료 버튼이 열려요. 10분 안에 완료하면 100% 보상!
+          시작 후 {STUDY_SESSION_SEC}초가 지나면 완료 버튼이 열려요. {PERFECT_SEC}초
+          안에 완료하면 100% 보상!
         </p>
       </div>
     );

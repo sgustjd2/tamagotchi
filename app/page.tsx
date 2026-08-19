@@ -18,7 +18,7 @@ const HERO_STATUS: CharacterStatus = {
 };
 
 const FEATURES = [
-  { icon: "study", title: "30분 집중 공부", desc: "시작하고 제때 완료하면 보너스! 집중력이 높을수록 더 쑥쑥 자라요." },
+  { icon: "study", title: "집중 공부 세션", desc: "시작하고 제때 완료하면 보너스! 집중력이 높을수록 더 쑥쑥 자라요." },
   { icon: "feed", title: "맛있는 밥 챙기기", desc: "끼니를 잘 챙겨주면 공부·업무 효율이 쑥 올라가요." },
   { icon: "heart", title: "몸무게·건강 관리", desc: "골고루 먹고 운동하면 컨디션 최고! 탄탄하게 키워봐요." },
   { icon: "selfDev", title: "꾸준한 자기개발", desc: "조금씩 쌓으면 나이가 들어도 능력치가 빛나요." },

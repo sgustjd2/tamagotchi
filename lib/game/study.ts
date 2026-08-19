@@ -2,15 +2,20 @@ import type { ActionEffect } from "@/types/action";
 import type { ActiveSession, Character } from "@/types/character";
 import { round2 } from "./clamp";
 import { learningEfficiency } from "./status";
+import { COOLDOWN_SCALE } from "./constants";
 
 const MIN = 60 * 1000;
 
-/** 완료 가능 시점 이후 100% 보상 윈도우 / 70% 윈도우 */
-export const STUDY_PERFECT_WINDOW_MS = 10 * MIN;
-export const STUDY_OK_WINDOW_MS = 30 * MIN;
+/**
+ * 완료 가능 시점 이후 100% 보상 윈도우 / 70% 윈도우.
+ * 세션 길이가 COOLDOWN_SCALE 로 줄어들므로(30분→90초) 윈도우도 같이 스케일해야
+ * perfect/ok/late 티어가 실제로 갈린다(원시값이면 유예가 세션보다 길어 티어가 죽는다).
+ */
+export const STUDY_PERFECT_WINDOW_MS = Math.round(10 * MIN * COOLDOWN_SCALE); // 30초
+export const STUDY_OK_WINDOW_MS = Math.round(30 * MIN * COOLDOWN_SCALE); // 90초
 
-/** 세션 동안 이만큼 이상 페이지가 숨겨져 있었으면 집중 실패로 간주 */
-export const STUDY_HIDDEN_FAIL_MS = 5 * MIN;
+/** 세션 동안 이만큼 이상 페이지가 숨겨져 있었으면 집중 실패 — 잠깐의 탭 전환은 허용 */
+export const STUDY_HIDDEN_FAIL_MS = 30 * 1000;
 
 const STUDY_BASE = {
   intelligence: 2,

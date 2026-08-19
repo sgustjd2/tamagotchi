@@ -40,6 +40,7 @@ import {
   FOODS,
   GAME_YEAR_MS,
   NEGLECT_DEATH_MS,
+  OFFLINE_DECAY_CAP_MS,
   OVEREAT_EXTRA_WEIGHT_BY_TIER,
   OVEREAT_HUNGER_THRESHOLD,
 } from "@/lib/game/constants";
@@ -270,7 +271,7 @@ export const useGameStore = create<GameState>()(
         if (!c) return;
         if (c.deathAge != null) return; // 사망 시 상태 동결(엔딩)
 
-        // 방치 사망: 현실 8시간 이상 앱을 열지 않은 경우
+        // 방치 사망: NEGLECT_DEATH_MS 이상 앱을 열지 않은 경우
         // applyDecay 이전에 체크하여 시간 점프 없이 방치 사망으로 처리
         const elapsed = now() - c.lastTickAt;
         if (elapsed > NEGLECT_DEATH_MS) {
@@ -284,7 +285,23 @@ export const useGameStore = create<GameState>()(
           return;
         }
 
-        const decayed = applyDecay(c, now());
+        // 오프라인 복귀 정산: 감쇠는 캡까지만 적용해 "자리 비움 → 굶주림 즉사"를 막는다
+        // (나이는 bornAt 기준이라 실시간 유지, 방치 사망 규칙은 위에서 이미 처리됨)
+        const decayBase =
+          elapsed > OFFLINE_DECAY_CAP_MS
+            ? { ...c, lastTickAt: now() - OFFLINE_DECAY_CAP_MS }
+            : c;
+        const decayed = applyDecay(decayBase, now());
+
+        // 10분 이상 자리 비웠다면 복귀 요약 토스트 1건
+        if (elapsed >= 10 * 60 * 1000) {
+          const dHunger = Math.round(c.status.hunger - decayed.status.hunger);
+          const dEnergy = Math.round(c.status.energy - decayed.status.energy);
+          const awayMin = Math.round(elapsed / 60000);
+          const away =
+            awayMin >= 60 ? `${Math.floor(awayMin / 60)}시간 ${awayMin % 60}분` : `${awayMin}분`;
+          pushToast(`⏰ 자리 비운 ${away} — 배고픔 -${dHunger} · 체력 -${dEnergy}`);
+        }
 
         // 굶주림 사망: 배고픔이 0 이하로 떨어지면 즉사
         if (decayed.status.hunger <= 0) {
@@ -463,10 +480,14 @@ export const useGameStore = create<GameState>()(
         if (!isActionReady(c, "study", t)) {
           return { ok: false, message: "아직 공부 쿨타임이에요." };
         }
-        const session = buildStudySession(t, cd(def.sessionMs ?? 30 * 60 * 1000));
+        const sessionMs = cd(def.sessionMs ?? 30 * 60 * 1000);
+        const session = buildStudySession(t, sessionMs);
         set({ character: { ...c, activeSession: session } });
         pulseAction("studying");
-        return { ok: true, message: "공부를 시작했어요. 30분 집중!" };
+        return {
+          ok: true,
+          message: `공부를 시작했어요. ${Math.round(sessionMs / 1000)}초 집중!`,
+        };
       },
 
       completeStudy: () => {

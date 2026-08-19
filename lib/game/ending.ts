@@ -72,8 +72,8 @@ export function lifeEnding(c: Character): LifeEnding {
   const happy = h >= 70;
   const unhappy = h < 40;
 
-  // 1) 요절 (사고/병으로 일찍)
-  if (age < 45 && FATAL_INCIDENTS.includes(cause)) {
+  // 1) 요절 (사고/병/굶주림으로 일찍)
+  if (age < 45 && (FATAL_INCIDENTS.includes(cause) || cause === "굶주림")) {
     return {
       title: "굵고 짧게 산 인생",
       subtitle: `${age}세, ${cause}로 갑작스레 세상을 떠났어요.`,

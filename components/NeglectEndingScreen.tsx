@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { Character } from "@/types/character";
 import { TamaDevice } from "@/components/character/TamaDevice";
 import { useGameStore } from "@/lib/store/useGameStore";
+import { NEGLECT_DEATH_MS } from "@/lib/game/constants";
 
 export function NeglectEndingScreen({ character }: { character: Character }) {
   const router = useRouter();
@@ -15,7 +16,7 @@ export function NeglectEndingScreen({ character }: { character: Character }) {
   };
 
   const { hunger, energy, mood } = character.status;
-  const neglectHours = 8;
+  const neglectHours = NEGLECT_DEATH_MS / 3_600_000;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">

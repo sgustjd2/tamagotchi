@@ -23,7 +23,7 @@ function coreStatBoost(c: Character, total: number): StatsDelta {
 /**
  * 액션 정의 목록.
  * - food: 밥 먹이기 (음식 선택은 FoodSelector + feed 로직에서 처리)
- * - session: 공부하기 (시작/완료 30분, study.ts 에서 보상 계산)
+ * - session: 공부하기 (시작→완료 세션, 실제 길이는 COOLDOWN_SCALE 적용, study.ts 에서 보상 계산)
  * - instant: 즉시 보상 액션
  */
 export const ACTIONS: ActionDef[] = [
@@ -54,7 +54,7 @@ export const ACTIONS: ActionDef[] = [
     key: "study",
     label: "공부하기",
     emoji: "📖",
-    desc: "30분 집중 세션. 끝나면 완료를 눌러 보상을 받아요.",
+    desc: "짧은 집중 세션. 끝나면 완료를 눌러 보상을 받아요.",
     kind: "session",
     cooldownMs: 30 * MIN,
     sessionMs: 30 * MIN,
