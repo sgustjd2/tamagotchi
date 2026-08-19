@@ -302,7 +302,8 @@ export function runDueReviews(
   }
 
   // 저축·행복 갱신(직전 1년) — 가족(배우자/자녀)·주거 안정감(전세/자가)이 행복에 소폭 추가
-  let yearSavingsDelta = yearlyNet(ch);
+  // 취업 전이면 그 해 등급이 용돈/알바 수입을 ±30% 가감한다(성적→용돈 피드백)
+  let yearSavingsDelta = yearlyNet(ch, { stage: reviewStage, grade });
   const familyWarmth =
     (ch.marriedAtAge != null ? 1 : 0) + Math.min(2, (ch.childrenBornAges ?? []).length);
   ch = {
@@ -443,7 +444,11 @@ export function runDueReviews(
     let gapSavingsDelta = 0;
     const lastGapYear = Math.min(age, MAX_AGE);
     for (let y = reviewAge + 1; y <= lastGapYear && ch.deathAge == null; y++) {
-      const net = yearlyNet(ch);
+      // 방치된 해는 최저 등급(D) 가감으로 용돈 지급 — 방치가 이득이 되지 않게
+      const net = yearlyNet(ch, {
+        stage: cappedStageForAge(y, ch.job != null),
+        grade: "D",
+      });
       ch = { ...ch, savings: ch.savings + net };
       gapSavingsDelta += net;
       const uniGap = processUniversityYear(ch, y);
