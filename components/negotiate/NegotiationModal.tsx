@@ -2,6 +2,7 @@
 
 import { useGameStore } from "@/lib/store/useGameStore";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
+import { ShareMomentButton } from "@/components/common/ShareMomentButton";
 
 const META = {
   success: {
@@ -26,6 +27,7 @@ const META = {
 
 export function NegotiationModal() {
   const result = useGameStore((s) => s.negotiationResult);
+  const character = useGameStore((s) => s.character);
   const ack = useGameStore((s) => s.ackNegotiation);
   if (!result) return null;
 
@@ -66,10 +68,24 @@ export function NegotiationModal() {
           </p>
         )}
 
+        {result.outcome === "success" && character && (
+          <ShareMomentButton
+            character={character}
+            moment={{
+              emoji: "💰",
+              title: "연봉협상 성공!",
+              subtitle: `만 ${result.atAge}세 · 인상률 +${result.raisePct}%`,
+              lines: [
+                `${result.salaryBefore.toLocaleString()} → ${result.salaryAfter.toLocaleString()}만원`,
+              ],
+            }}
+          />
+        )}
+
         <button
           type="button"
           onClick={ack}
-          className="toy-btn mt-5 w-full bg-coral text-ink"
+          className="toy-btn mt-3 w-full bg-coral text-ink"
         >
           확인
         </button>

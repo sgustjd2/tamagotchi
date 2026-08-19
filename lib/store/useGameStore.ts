@@ -159,7 +159,10 @@ interface GameState {
     kind: MinigameKind,
     extra?: { choice?: RpsChoice; accuracy?: number },
   ) => ActionResult;
-  pullGacha: (category: GachaCategory) => ActionResult;
+  pullGacha: (category: GachaCategory) => ActionResult & {
+    /** 뽑힌 아이템 정보 — 레어면 UI 에서 순간 카드 공유 버튼을 띄운다 */
+    pull?: { emoji: string; label: string; price: number; rare: boolean };
+  };
   equipWardrobe: (kind: "outfit" | "accessory", key: WardrobeItemKey | null) => ActionResult;
   moveHousing: (key: HousingOptionKey) => ActionResult;
   startSecondGeneration: () => ActionResult;
@@ -785,7 +788,16 @@ export const useGameStore = create<GameState>()(
           fireFx({ tier: "great", mult: 1, label: `✨ ${pull.item.label}!` });
         }
         pulseAction("playing");
-        return { ok: true, message: pull.item.label };
+        return {
+          ok: true,
+          message: pull.item.label,
+          pull: {
+            emoji: pull.item.emoji,
+            label: pull.item.label,
+            price: pull.item.price,
+            rare: pull.rare,
+          },
+        };
       },
 
       doLeisure: (key) => {

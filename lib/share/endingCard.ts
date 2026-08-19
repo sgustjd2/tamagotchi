@@ -1,4 +1,5 @@
 // 엔딩 결산 카드(이미지) 생성 + 공유/복사/저장. 백엔드·외부전송 없음(로컬 canvas).
+// 그리기 언어·공유 파이프라인은 cardCanvas.ts 공용(순간 카드와 공유).
 import type { Character } from "@/types/character";
 import { computeLifeScore, formatMoney, lifeEnding } from "@/lib/game/ending";
 import {
@@ -8,48 +9,17 @@ import {
   RANK_ORDER,
 } from "@/lib/game/ranking";
 import { DEGREE_LABEL } from "@/lib/game/degree";
-import { getMascotColor } from "@/lib/game/constants";
 import {
-  buildCharacterMatrix,
-  GRID_H,
-  GRID_W,
-  matrixToCells,
-} from "@/lib/game/sprite/characterStageConfig";
-import {
-  getCharacterVisualState,
-  jobTypeFromFamily,
-} from "@/lib/game/sprite/characterVisualState";
-import { colorForCode, LCD_INK_PALETTE } from "@/lib/game/sprite/characterPalettes";
-import { bodyShapeForWeight } from "@/lib/game/weight";
+  CARD_COLORS as C,
+  CARD_PIXEL_FONT as PIXEL,
+  drawMascotBox,
+  roundRect as rr,
+  shareCanvas,
+  waitForFonts,
+  type ShareResult,
+} from "./cardCanvas";
 
-const C = {
-  cream: "#FFF8F0",
-  ink: "#2E2722",
-  lcd: "#E5EAD2",
-  lcdink: "#3A2E22",
-  butter: "#FFE3A3",
-  mint: "#A8E6CF",
-  white: "#FFFFFF",
-  blush: "#FF9FB0",
-};
-const PIXEL = "'Galmuri11', 'DungGeunMo', monospace";
-
-function rr(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number,
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
+export type { ShareResult };
 
 export function drawEndingCard(canvas: HTMLCanvasElement, c: Character) {
   const W = 720;
@@ -78,55 +48,11 @@ export function drawEndingCard(canvas: HTMLCanvasElement, c: Character) {
   ctx.font = `bold 22px ${PIXEL}`;
   ctx.fillText("LifeGotchi · 인생 결산", W / 2, 56);
 
-  // 마스코트 (기기 색 + LCD)
-  const col = getMascotColor(c.color);
+  // 마스코트 (기기 색 + LCD) — 평온한 마지막 모습
   const boxS = 188;
   const boxX = (W - boxS) / 2;
   const boxY = 78;
-  ctx.fillStyle = col.body;
-  rr(ctx, boxX, boxY, boxS, boxS, 26);
-  ctx.fill();
-  ctx.strokeStyle = C.ink;
-  ctx.lineWidth = 5;
-  rr(ctx, boxX, boxY, boxS, boxS, 26);
-  ctx.stroke();
-  const pad = 22;
-  const lcd = boxS - pad * 2;
-  ctx.fillStyle = C.lcd;
-  rr(ctx, boxX + pad, boxY + pad, lcd, lcd, 14);
-  ctx.fill();
-  // 실제 게임과 동일한 픽셀 캐릭터(외형/직업/체형 반영) — 평온한 마지막 모습
-  const vs = getCharacterVisualState({
-    lifeStage: "retirement",
-    mood: 80,
-    hunger: 70,
-    energy: 70,
-    health: 80,
-    burnout: 10,
-  });
-  const matrix = buildCharacterMatrix(
-    vs,
-    "retirement",
-    jobTypeFromFamily(c.job?.family),
-    c.gender,
-    c.appearance,
-    bodyShapeForWeight(c.status.weight, age),
-  );
-  const cells = matrixToCells(matrix);
-  const px = (lcd / GRID_H) * 0.92; // 세로(20칸)에 맞춤
-  const gx = boxX + pad + (lcd - px * GRID_W) / 2;
-  const gy = boxY + pad + (lcd - px * GRID_H) / 2;
-  cells.forEach((cell) => {
-    const color = colorForCode(cell.code, LCD_INK_PALETTE);
-    if (!color) return;
-    ctx.fillStyle = color;
-    ctx.fillRect(
-      Math.floor(gx + cell.x * px),
-      Math.floor(gy + cell.y * px),
-      Math.ceil(px),
-      Math.ceil(px),
-    );
-  });
+  drawMascotBox(ctx, c, boxX, boxY, boxS, "retirement");
 
   let y = boxY + boxS + 46;
   ctx.fillStyle = C.ink;
@@ -205,66 +131,14 @@ export function drawEndingCard(canvas: HTMLCanvasElement, c: Character) {
   ctx.fillText("LifeGotchi 에서 내 인생 키우기 🐣", W / 2, y);
 }
 
-export type ShareResult = "shared" | "copied" | "downloaded" | "failed";
-
 /** 결산 카드 PNG 를 공유(모바일)→클립보드→다운로드 순으로 시도 */
 export async function shareEndingCard(c: Character): Promise<ShareResult> {
-  try {
-    await (document.fonts?.ready ?? Promise.resolve());
-  } catch {
-    /* 폰트 준비 실패해도 기본 폰트로 진행 */
-  }
+  await waitForFonts();
   const canvas = document.createElement("canvas");
   drawEndingCard(canvas, c);
-  const blob = await new Promise<Blob | null>((res) =>
-    canvas.toBlob((b) => res(b), "image/png"),
-  );
-  if (!blob) return "failed";
-
-  const file = new File([blob], "lifegotchi.png", { type: "image/png" });
-  const nav = navigator as Navigator & {
-    canShare?: (d: { files: File[] }) => boolean;
-    share?: (d: unknown) => Promise<void>;
-  };
-
-  // 1) Web Share (모바일)
-  try {
-    if (nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
-      await nav.share({
-        files: [file],
-        title: "LifeGotchi 인생 결산",
-        text: `${c.name}의 인생 결산!`,
-      });
-      return "shared";
-    }
-  } catch (e) {
-    if ((e as { name?: string })?.name === "AbortError") return "shared";
-  }
-
-  // 2) 클립보드 이미지
-  try {
-    const CItem = (window as unknown as { ClipboardItem?: typeof ClipboardItem })
-      .ClipboardItem;
-    if (navigator.clipboard && CItem) {
-      await navigator.clipboard.write([new CItem({ "image/png": blob })]);
-      return "copied";
-    }
-  } catch {
-    /* 클립보드 실패 → 다운로드 */
-  }
-
-  // 3) 다운로드
-  try {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "lifegotchi-인생결산.png";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    return "downloaded";
-  } catch {
-    return "failed";
-  }
+  return shareCanvas(canvas, {
+    filename: "lifegotchi-인생결산.png",
+    title: "LifeGotchi 인생 결산",
+    text: `${c.name}의 인생 결산!`,
+  });
 }
