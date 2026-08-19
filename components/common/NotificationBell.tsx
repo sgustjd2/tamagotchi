@@ -20,7 +20,7 @@ export function NotificationBell({
   if (permission === "granted") {
     return (
       <span className="pill bg-mint/40 text-ink/60" title="탭이 열려 있는 동안 배고픔/피로/건강 알림을 보내요">
-        🔔 알림 ON
+        🔔 <span className="hidden sm:inline">알림 ON</span>
       </span>
     );
   }
@@ -32,7 +32,7 @@ export function NotificationBell({
           onClick={() => setShowHelp((v) => !v)}
           className="pill bg-black/10 py-1.5 text-ink/40 transition-colors hover:bg-black/15 md:py-0.5"
         >
-          🔕 알림 차단됨
+          🔕 <span className="hidden sm:inline">알림 차단됨</span>
         </button>
         {showHelp && (
           <span className="absolute right-0 top-full z-50 mt-1 block w-56 rounded-xl border-2 border-ink/20 bg-white p-2.5 text-left text-[11px] leading-relaxed text-ink/70 shadow-lg">

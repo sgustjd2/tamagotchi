@@ -228,7 +228,7 @@ export const useGameStore = create<GameState>()(
       const levelUpSuffix = (before: Character, after: Character): string => {
         if (after.level <= before.level) return "";
         const gained = (after.level - before.level) * STAT_POINTS_PER_LEVEL;
-        return ` 🎉 레벨 업! Lv.${after.level} (스탯 포인트 +${gained})`;
+        return ` 🎉 레벨 업! Lv.${after.level} (스탯 포인트 +${gained} — 상태 탭에서 배분!)`;
       };
 
       return {
@@ -321,7 +321,9 @@ export const useGameStore = create<GameState>()(
         const toastParts: string[] = [];
         if (character.level > c.level) {
           const gained = (character.level - c.level) * STAT_POINTS_PER_LEVEL;
-          toastParts.push(`🎉 레벨 업! Lv.${character.level} (스탯 포인트 +${gained})`);
+          toastParts.push(
+            `🎉 레벨 업! Lv.${character.level} (스탯 포인트 +${gained} — 상태 탭에서 배분!)`,
+          );
         }
         const savingsDelta = reviews.reduce((sum, r) => sum + r.savingsDelta, 0);
         if (savingsDelta !== 0) {

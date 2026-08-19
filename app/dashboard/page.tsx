@@ -109,7 +109,7 @@ export default function DashboardPage() {
           <SoundToggle />
           <NotificationBell permission={permission} onRequest={requestPermission} />
           {next && (
-            <span className="pill bg-white py-1.5 text-ink/60 md:py-0.5">
+            <span className="pill hidden bg-white py-1.5 text-ink/60 min-[480px]:inline-flex md:py-0.5">
               <span className="hidden sm:inline">다음:&nbsp;</span>
               {next.label}까지 {next.inYears}살
             </span>
@@ -119,6 +119,12 @@ export default function DashboardPage() {
             className="pill hidden bg-white text-ink/60 hover:bg-cream lg:inline-flex"
           >
             성장기록
+          </Link>
+          <Link
+            href="/help"
+            className="pill hidden bg-white text-ink/60 hover:bg-cream lg:inline-flex"
+          >
+            도움말
           </Link>
         </div>
       </header>

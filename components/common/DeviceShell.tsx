@@ -18,7 +18,7 @@ export function DeviceShell({
   onC: () => void;
 }) {
   return (
-    <div className="mx-auto h-dvh max-w-5xl px-1 pb-[calc(4.25rem+env(safe-area-inset-bottom))] pt-1 sm:px-3 sm:pt-2 lg:pb-3">
+    <div className="mx-auto h-dvh max-w-5xl px-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))] pt-1 sm:px-3 sm:pt-2 lg:pb-3 [@media(max-height:480px)]:h-auto [@media(max-height:480px)]:min-h-dvh">
       {/* 플라스틱 바디 — 위가 더 둥근 에그 실루엣 */}
       <div className="relative flex h-full min-h-0 flex-col rounded-[2.25rem_2.25rem_1.75rem_1.75rem] border-[3px] border-ink bg-gradient-to-b from-blush via-[#FFD3DC] to-cream p-1.5 shadow-[5px_6px_0_0_rgba(46,39,34,0.16)] sm:p-2.5 md:rounded-[3.5rem_3.5rem_2.5rem_2.5rem] md:p-3">
         {/* 곡면 플라스틱 하이라이트 */}
@@ -28,17 +28,19 @@ export function DeviceShell({
         />
         {/* 베젤(잉크 림) + LCD 스크린 */}
         <div className="min-h-0 flex-1 rounded-[1.75rem] border-[3px] border-ink bg-ink p-1.5 shadow-[inset_0_3px_6px_rgba(0,0,0,0.45)] md:rounded-[2.5rem] md:p-2">
-          <div className="lcd flex h-full min-h-0 flex-col gap-1.5 overflow-hidden px-2 pb-0.5 pt-1.5 shadow-[inset_0_2px_10px_rgba(46,39,34,0.28)] sm:gap-2.5 sm:px-3 sm:pb-1 sm:pt-2.5 md:px-4 md:pt-3">
+          <div className="lcd flex h-full min-h-0 flex-col gap-1.5 overflow-hidden px-2 pb-0.5 pt-1.5 shadow-[inset_0_2px_10px_rgba(46,39,34,0.28)] sm:gap-2.5 sm:px-3 sm:pb-1 sm:pt-2.5 md:px-4 md:pt-3 [@media(max-height:480px)]:overflow-visible">
             {children}
           </div>
         </div>
-        {/* 친 — 물리 버튼 3개(가운데가 낮은 에그 곡선 배치) */}
-        <div className="flex shrink-0 items-start justify-center gap-5 px-3 pb-1 pt-1 sm:gap-7 sm:px-4 sm:pb-2 sm:pt-2 md:gap-10 md:pt-3">
+        {/* 친 — 물리 버튼 3개(가운데가 낮은 에그 곡선 배치).
+            모바일에선 숨김: LCD 안 탭바가 같은 기능을 제공하고, 세로 공간(~58px)이 더 귀하다 */}
+        <div className="hidden shrink-0 items-start justify-center gap-5 px-3 pb-1 pt-1 sm:flex sm:gap-7 sm:px-4 sm:pb-2 sm:pt-2 md:gap-10 md:pt-3">
           <button
             type="button"
             onClick={onA}
             aria-label="이전 탭 (A 버튼)"
-            className="shell-btn h-10 w-10 bg-blush text-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-sky sm:h-12 sm:w-12"
+            title="이전 탭 (A 버튼)"
+            className="shell-btn h-10 w-10 bg-blush text-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ink sm:h-12 sm:w-12"
           >
             A
           </button>
@@ -46,7 +48,8 @@ export function DeviceShell({
             type="button"
             onClick={onB}
             aria-label="확인 — 현재 탭 맨 위로 (B 버튼)"
-            className="shell-btn mt-1.5 h-11 w-11 bg-butter text-base focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-sky sm:mt-2.5 sm:h-14 sm:w-14"
+            title="확인 — 현재 탭 맨 위로 (B 버튼)"
+            className="shell-btn mt-1.5 h-11 w-11 bg-butter text-base focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ink sm:mt-2.5 sm:h-14 sm:w-14"
           >
             B
           </button>
@@ -54,7 +57,8 @@ export function DeviceShell({
             type="button"
             onClick={onC}
             aria-label="다음 탭 (C 버튼)"
-            className="shell-btn h-10 w-10 bg-mint text-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-sky sm:h-12 sm:w-12"
+            title="다음 탭 (C 버튼)"
+            className="shell-btn h-10 w-10 bg-mint text-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ink sm:h-12 sm:w-12"
           >
             C
           </button>

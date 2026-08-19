@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import type { Character } from "@/types/character";
 import { cn } from "@/lib/utils";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
+import { StatBar } from "@/components/common/StatBar";
 import { ActionGrid } from "@/components/actions/ActionGrid";
 import { FoodSelector } from "@/components/actions/FoodSelector";
 import { StudyCard } from "@/components/actions/StudyCard";
@@ -69,19 +70,32 @@ export function DashboardTabs({
             type="button"
             onClick={() => switchTab(t.key)}
             className={cn(
-              "toy-btn flex items-center justify-center gap-1 whitespace-nowrap px-1 py-2 font-pixel text-[11px] font-bold transition-transform duration-150 sm:gap-1.5 sm:text-xs",
+              "toy-btn relative flex items-center justify-center gap-1 whitespace-nowrap px-1 py-2 font-pixel text-[11px] font-bold transition-transform duration-150 sm:gap-1.5 sm:text-xs",
               "hover:[transform:rotateX(10deg)_translateY(-2px)]",
               tab === t.key ? "bg-butter" : "bg-white",
             )}
           >
             <PixelIcon name={t.icon} size={13} className="shrink-0" />
             {t.label}
+            {/* 미배분 스탯 포인트가 있으면 상태 탭에 도트 배지 — 배분 UI 발견성 */}
+            {t.key === "status" && character.statPoints > 0 && (
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border border-ink bg-coral" />
+            )}
           </button>
         ))}
       </div>
 
       <div ref={scrollRef} className="scroll-hide min-h-0 flex-1 overflow-y-auto pb-2">
         <div className={panelCls("care")}>
+          {/* 모바일 전용 핵심 컨디션 4종 — 데스크톱은 왼쪽 캐릭터 패널이 담당 */}
+          <div className="card p-3 md:hidden">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              <StatBar label="배고픔" value={character.status.hunger} />
+              <StatBar label="체력" value={character.status.energy} />
+              <StatBar label="기분" value={character.status.mood} />
+              <StatBar label="건강" value={character.status.health} />
+            </div>
+          </div>
           <StudyCard character={character} now={now} />
           <div className="card p-4">
             <h3 className="mb-3 font-pixel text-sm font-bold text-ink/80">식사</h3>
@@ -90,6 +104,30 @@ export function DashboardTabs({
           <ActionGrid character={character} now={now} />
         </div>
         <div className={panelCls("status")}>
+          {/* 모바일 전용 전체 컨디션 — 데스크톱 왼쪽 패널과 동일 구성 */}
+          <div className="card p-3 md:hidden">
+            <h3 className="mb-2 font-pixel text-sm font-bold text-ink/80">컨디션</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              <StatBar label="배고픔" value={character.status.hunger} />
+              <StatBar label="체력" value={character.status.energy} />
+              <StatBar label="기분" value={character.status.mood} />
+              <StatBar label="건강" value={character.status.health} />
+              <StatBar label="집중력" value={character.status.focus} />
+              <StatBar label="청결" value={character.status.cleanliness} />
+              <StatBar label="수면 질" value={character.status.sleepQuality} />
+              <StatBar label="자신감" value={character.status.confidence} />
+              <StatBar
+                label="스트레스"
+                value={character.status.stress}
+                higherIsBetter={false}
+              />
+              <StatBar
+                label="번아웃"
+                value={character.status.burnout}
+                higherIsBetter={false}
+              />
+            </div>
+          </div>
           <WeightCard character={character} />
           <CareerCard character={character} />
           <StatsPanel character={character} />
