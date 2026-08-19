@@ -2,7 +2,7 @@ import type { CharacterStatus } from "@/types/character";
 import { StartCta } from "@/components/common/StartCta";
 import { CharacterPreviewCard } from "@/components/character/CharacterPreviewCard";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
-import { BottomNav } from "@/components/common/BottomNav";
+import { GAME_YEAR_MS, NEGLECT_DEATH_MS } from "@/lib/game/constants";
 const HERO_STATUS: CharacterStatus = {
   hunger: 82,
   energy: 86,
@@ -28,7 +28,7 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-5 py-12 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-12">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-5 py-12">
       <section className="flex w-full flex-col items-center text-center">
         <div className="mb-5 w-full max-w-[260px]">
           <CharacterPreviewCard lifeStage="middle" status={HERO_STATUS} width={240} />
@@ -36,13 +36,18 @@ export default function LandingPage() {
         <span className="pill mb-4 bg-white text-ink/70">한국형 인생·커리어 다마고치</span>
         <h1 className="font-pixel text-4xl font-bold sm:text-5xl">LifeGotchi</h1>
         <p className="mt-4 max-w-xl text-base text-ink/65 sm:text-lg">
-          아기부터 키워서 공부·건강관리·자기개발을 거쳐 취업, 업무평가, 연봉협상, 승진까지.
-          페이지를 켜두고 <b>주기적으로 직접 눌러줘야</b> 성장하는 인생 육성 웹앱이에요.
+          아기부터 키워서 공부·건강관리·자기개발을 거쳐{" "}
+          <b>취업, 업무평가, 연봉협상, 승진까지</b>. 페이지를 켜두고 주기적으로
+          직접 돌봐야 성장하는 인생 육성 웹앱이에요.
         </p>
         <div className="mt-8">
           <StartCta />
         </div>
         <p className="mt-3 font-pixel text-xs text-ink/45">
+          게임 1년 = 현실 {GAME_YEAR_MS / 60000}분 · {NEGLECT_DEATH_MS / 3_600_000}
+          시간 이상 방치하면 떠나보낼 수 있어요
+        </p>
+        <p className="mt-1 font-pixel text-xs text-ink/45">
           회원가입 없이 바로 시작 · 개인정보를 받지 않아요
         </p>
       </section>
@@ -67,8 +72,6 @@ export default function LandingPage() {
       <footer className="mt-16 font-pixel text-center text-xs text-ink/50">
         데이터는 이 브라우저에만 저장됩니다 · 개인정보를 받지 않아요
       </footer>
-
-      <BottomNav />
     </main>
   );
 }

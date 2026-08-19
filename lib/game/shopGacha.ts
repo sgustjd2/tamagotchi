@@ -14,6 +14,9 @@ import { WARDROBE_ITEMS } from "./wardrobe";
 
 export type GachaCategory = "wardrobe" | "room" | "car";
 
+/** 자동차 뽑기 최소 나이 */
+export const CAR_MIN_AGE = 20;
+
 /** 뽑기 후보 공통 형태(정가는 희귀도 산정·"이득" 표시 기준) */
 export interface GachaItem {
   key: string;
@@ -43,6 +46,8 @@ export function gachaPool(c: Character, category: GachaCategory): GachaItem[] {
   } else if (category === "room") {
     pool = ROOM_ITEMS.filter((i) => !c.roomItems.includes(i.key));
   } else {
+    // 자동차는 성인(20살)부터 — 0세가 슈퍼카를 뽑는 것 방지
+    if (c.ageYears < CAR_MIN_AGE) return [];
     const cur = ownedTier(c.assets, "car");
     pool = ASSETS.filter((a) => a.tier > cur);
   }
@@ -60,6 +65,9 @@ export function canPullGacha(
       WARDROBE_ITEMS.some((w) => !c.wardrobe.includes(w.key))
     ) {
       return { ok: false, reason: "지금 나이에 뽑을 수 있는 옷은 다 모았어요!" };
+    }
+    if (category === "car" && c.ageYears < CAR_MIN_AGE) {
+      return { ok: false, reason: `자동차는 ${CAR_MIN_AGE}살부터!` };
     }
     return { ok: false, reason: "모두 소장하고 있어요!" };
   }

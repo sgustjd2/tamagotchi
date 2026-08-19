@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/common/BottomNav";
+import { SaveBackup } from "@/components/common/SaveBackup";
 import { NEGLECT_DEATH_MS } from "@/lib/game/constants";
 
 const NEGLECT_HOURS = NEGLECT_DEATH_MS / 3_600_000;
@@ -108,6 +109,10 @@ export default function HelpPage() {
             </ul>
           </section>
         ))}
+      </div>
+
+      <div className="mt-3">
+        <SaveBackup />
       </div>
 
       <p className="mt-4 text-center text-xs text-ink/45">

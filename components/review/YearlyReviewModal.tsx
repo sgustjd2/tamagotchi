@@ -52,7 +52,7 @@ export function YearlyReviewModal() {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
-      <div className="w-full max-w-md animate-pop rounded-t-2xl border-[3px] border-ink bg-white p-6 shadow-[6px_6px_0_0_rgba(46,39,34,0.25)] sm:rounded-2xl">
+      <div className="max-h-[calc(100dvh-1rem)] w-full max-w-md animate-pop overflow-y-auto rounded-t-2xl border-[3px] border-ink bg-white p-6 shadow-[6px_6px_0_0_rgba(46,39,34,0.25)] sm:rounded-2xl">
         {review.kind === "neglected" ? (
           <NeglectedBody review={review} />
         ) : (
@@ -62,7 +62,7 @@ export function YearlyReviewModal() {
         <button
           type="button"
           onClick={ack}
-          className="toy-btn mt-5 w-full bg-coral text-white"
+          className="toy-btn mt-5 w-full bg-coral text-ink"
         >
           {remaining > 0 ? `확인 (${remaining}건 더)` : "확인"}
         </button>
