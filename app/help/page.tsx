@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { BottomNav } from "@/components/common/BottomNav";
 import { SaveBackup } from "@/components/common/SaveBackup";
+import { SlimShell } from "@/components/common/SlimShell";
 import { NEGLECT_DEATH_MS } from "@/lib/game/constants";
 import { STAT_GLOSSARY, STATUS_GLOSSARY } from "@/lib/game/glossary";
 
@@ -81,15 +81,7 @@ const SECTIONS: { emoji: string; title: string; lines: string[] }[] = [
 
 export default function HelpPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-pixel text-sm font-bold text-ink/55">
-          ← 대시보드
-        </Link>
-        <h1 className="font-pixel text-base font-bold">게임 도움말</h1>
-        <span className="w-16" />
-      </header>
-
+    <SlimShell title="게임 도움말">
       <p className="mb-4 text-sm text-ink/55">
         LifeGotchi 는 <b>페이지를 켜 두고 주기적으로 직접 돌봐야</b> 성장하는 인생
         육성 게임이에요. 핵심 규칙만 알면 어렵지 않아요.
@@ -148,6 +140,6 @@ export default function HelpPage() {
         데이터는 이 브라우저에만 저장돼요 · 개인정보를 받지 않아요
       </p>
       <BottomNav />
-    </main>
+    </SlimShell>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { ReviewTimeline } from "@/components/review/ReviewTimeline";
 import { BottomNav } from "@/components/common/BottomNav";
+import { SlimShell } from "@/components/common/SlimShell";
 import { Toast } from "@/components/common/Toast";
 import { YearlyReviewModal } from "@/components/review/YearlyReviewModal";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
@@ -33,21 +33,11 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-pixel text-sm font-bold text-ink/55">
-          ← 대시보드
-        </Link>
-        <h1 className="font-pixel text-base font-bold">성장 기록</h1>
-        <span className="w-16" />
-      </header>
-      <p className="mb-3 text-sm text-ink/55">
-        {character.name}의 해마다 결산이 쌓여요.
-      </p>
+    <SlimShell title="성장 기록" subtitle={`${character.name}의 해마다 결산이 쌓여요.`}>
       <ReviewTimeline reviews={character.reviews ?? []} />
       <YearlyReviewModal />
       <Toast />
       <BottomNav />
-    </main>
+    </SlimShell>
   );
 }

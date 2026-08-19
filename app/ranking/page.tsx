@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { RankingPanel } from "@/components/ranking/RankingPanel";
 import { BottomNav } from "@/components/common/BottomNav";
+import { SlimShell } from "@/components/common/SlimShell";
 import { Toast } from "@/components/common/Toast";
 import { YearlyReviewModal } from "@/components/review/YearlyReviewModal";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
@@ -33,23 +33,12 @@ export default function RankingPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-4 px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="flex items-center justify-between">
-        <Link
-          href="/dashboard"
-          className="font-pixel text-sm font-bold text-ink/55"
-        >
-          ← 대시보드
-        </Link>
-        <h1 className="font-pixel text-base font-bold">랭킹</h1>
-        <span className="w-16" />
-      </header>
-
+    <SlimShell title="랭킹">
       <RankingPanel character={character} />
 
       <YearlyReviewModal />
       <Toast />
       <BottomNav />
-    </main>
+    </SlimShell>
   );
 }
