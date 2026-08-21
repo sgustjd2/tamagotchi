@@ -100,7 +100,7 @@ export function FoodSelector({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-md p-1 hover:bg-black/5"
+                className="tap-44 rounded-md p-1 hover:bg-black/5"
                 aria-label="닫기"
               >
                 <X className="h-5 w-5" />

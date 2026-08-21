@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createCharacter } from "@/lib/game/character";
 import { LIVING_COST, MAX_AGE } from "@/lib/game/constants";
 import {
+  ALLOWANCE_BY_STAGE,
   CHILD_COST,
   INCIDENT_CAUSES,
   ageRiskPct,
@@ -132,6 +133,37 @@ describe("yearlyNet — 연간 저축 변화", () => {
   it("자녀가 있으면 1명당 CHILD_COST 만큼 양육비가 추가된다", () => {
     const c = { ...base(), job: devJob(5000), childrenBornAges: [30, 33] };
     expect(yearlyNet(c)).toBe(5000 - LIVING_COST - 2 * CHILD_COST);
+  });
+
+  it("취업 전 학생/취준생은 stage 를 주면 단계별 용돈/알바 수입", () => {
+    expect(yearlyNet(base(), { stage: "elementary" })).toBe(
+      ALLOWANCE_BY_STAGE.elementary,
+    );
+    expect(yearlyNet(base(), { stage: "jobseeker" })).toBe(
+      ALLOWANCE_BY_STAGE.jobseeker,
+    );
+    // 용돈이 없는 단계(아기)는 0
+    expect(yearlyNet(base(), { stage: "baby" })).toBe(0);
+  });
+
+  it("등급이 용돈을 ±30% 가감한다 (S > B > D)", () => {
+    const high = (g: "S" | "B" | "D") =>
+      yearlyNet(base(), { stage: "high", grade: g });
+    expect(high("S")).toBeGreaterThan(high("B"));
+    expect(high("B")).toBeGreaterThan(high("D"));
+    expect(high("S")).toBe(Math.round(ALLOWANCE_BY_STAGE.high! * 1.3));
+    expect(high("D")).toBe(Math.round(ALLOWANCE_BY_STAGE.high! * 0.7));
+  });
+
+  it("용돈은 보수적 — 최대치(알바)도 생활비보다 작고, 취업자는 opts 무시", () => {
+    const maxAllowance = Math.max(
+      ...Object.values(ALLOWANCE_BY_STAGE).map((v) => Math.round(v * 1.3)),
+    );
+    expect(maxAllowance).toBeLessThan(LIVING_COST);
+    const employed = { ...base(), job: devJob(5000) };
+    expect(yearlyNet(employed, { stage: "jobseeker", grade: "S" })).toBe(
+      5000 - LIVING_COST,
+    );
   });
 });
 

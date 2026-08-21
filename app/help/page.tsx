@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { BottomNav } from "@/components/common/BottomNav";
 import { SaveBackup } from "@/components/common/SaveBackup";
+import { SlimShell } from "@/components/common/SlimShell";
 import { NEGLECT_DEATH_MS } from "@/lib/game/constants";
+import { STAT_GLOSSARY, STATUS_GLOSSARY } from "@/lib/game/glossary";
 
 const NEGLECT_HOURS = NEGLECT_DEATH_MS / 3_600_000;
 
@@ -63,6 +64,7 @@ const SECTIONS: { emoji: string; title: string; lines: string[] }[] = [
     lines: [
       "수명·순자산·행복도·직업에 따라 12가지 이상의 열린 결말이 갈려요. 행복도는 매년 컨디션의 평생 평균이에요.",
       "자녀가 있다면 사망 후 '2세대로 이어가기' — 순자산의 20%를 유산으로, 부모 스탯의 일부를 재능으로 물려받아요.",
+      "부모가 쓰던 옷·방 아이템도 각각 2~3개 유품으로 따라와요(옷은 나이가 차야 입을 수 있어요). 유산이 크면 본가 대신 원룸·전세·자가에서 인생을 시작할 수 있고, 남은 유산은 저축으로 남아요.",
       "엔딩 화면에서 결과 카드를 이미지로 공유할 수 있어요.",
     ],
   },
@@ -79,15 +81,7 @@ const SECTIONS: { emoji: string; title: string; lines: string[] }[] = [
 
 export default function HelpPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-pixel text-sm font-bold text-ink/55">
-          ← 대시보드
-        </Link>
-        <h1 className="font-pixel text-base font-bold">게임 도움말</h1>
-        <span className="w-16" />
-      </header>
-
+    <SlimShell title="게임 도움말">
       <p className="mb-4 text-sm text-ink/55">
         LifeGotchi 는 <b>페이지를 켜 두고 주기적으로 직접 돌봐야</b> 성장하는 인생
         육성 게임이에요. 핵심 규칙만 알면 어렵지 않아요.
@@ -111,6 +105,33 @@ export default function HelpPage() {
         ))}
       </div>
 
+      {/* 지표 사전 — 컨디션·스탯 정의(단일 출처: lib/game/glossary.ts) */}
+      <section className="card mt-3 p-4">
+        <h2 className="mb-2 font-pixel text-sm font-bold text-ink/80">
+          📖 지표 사전
+        </h2>
+        <h3 className="font-pixel text-xs font-bold text-ink/60">
+          컨디션 — 시간이 흐르면 줄고, 케어로 회복
+        </h3>
+        <ul className="mt-1.5 flex flex-col gap-1.5">
+          {STATUS_GLOSSARY.map((g) => (
+            <li key={g.key} className="text-[13px] leading-relaxed text-ink/70">
+              <b className="font-pixel text-ink/80">{g.label}</b> — {g.desc}
+            </li>
+          ))}
+        </ul>
+        <h3 className="mt-3 font-pixel text-xs font-bold text-ink/60">
+          능력치 — 레벨업 포인트 배분·행동으로 성장
+        </h3>
+        <ul className="mt-1.5 flex flex-col gap-1.5">
+          {STAT_GLOSSARY.map((g) => (
+            <li key={g.key} className="text-[13px] leading-relaxed text-ink/70">
+              <b className="font-pixel text-ink/80">{g.label}</b> — {g.desc}
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <div className="mt-3">
         <SaveBackup />
       </div>
@@ -119,6 +140,6 @@ export default function HelpPage() {
         데이터는 이 브라우저에만 저장돼요 · 개인정보를 받지 않아요
       </p>
       <BottomNav />
-    </main>
+    </SlimShell>
   );
 }

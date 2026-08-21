@@ -18,8 +18,13 @@ import {
 } from "@/lib/game/ranking";
 import { getHall, saveHall } from "@/lib/storage/hall";
 import { shareEndingCard } from "@/lib/share/endingCard";
-import { canStartSecondGen, inheritanceAmount } from "@/lib/game/legacy";
+import {
+  canStartSecondGen,
+  inheritanceAmount,
+  startingHousingOptions,
+} from "@/lib/game/legacy";
 import { housingLabel } from "@/lib/game/housing";
+import type { HousingOptionKey } from "@/types/character";
 import { useGameStore } from "@/lib/store/useGameStore";
 
 export function EndingScreen({ character }: { character: Character }) {
@@ -80,15 +85,25 @@ export function EndingScreen({ character }: { character: Character }) {
 
   const childCount = character.childrenBornAges?.length ?? 0;
   const canSecondGen = canStartSecondGen(character);
+  const inherited = inheritanceAmount(character);
+  const generation = character.generation ?? 1;
+  // 유산으로 대출 없이 감당 가능한 시작 주거 — 본가(0원)는 항상 포함되므로 최소 1개
+  const startHomes = startingHousingOptions(inherited);
+  const [startHome, setStartHome] = useState<HousingOptionKey>("parents");
   const continueAsChild = () => {
-    const r = startSecondGeneration();
+    const r = startSecondGeneration(startHome);
     if (r.ok) router.push("/dashboard");
   };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
       <div className="card p-7 text-center">
-        <span className="pill mx-auto bg-ink/10 text-ink/70">인생 결산</span>
+        <div className="flex items-center justify-center gap-1.5">
+          <span className="pill bg-ink/10 text-ink/70">인생 결산</span>
+          {generation >= 2 && (
+            <span className="pill bg-grape/50 text-ink">{generation}세대</span>
+          )}
+        </div>
 
         <div className="my-4 opacity-80">
           <CharacterPreviewCard
@@ -105,6 +120,12 @@ export function EndingScreen({ character }: { character: Character }) {
         <p className="font-pixel text-xs text-ink/55">
           만 {age}세 · {character.deathCause ?? "노환"}으로 영면
         </p>
+        {character.legacy && (
+          <p className="mt-0.5 font-pixel text-[10px] text-ink/45">
+            {character.legacy.parentName}에게 유산{" "}
+            {formatMoney(character.legacy.inheritedManwon)}을 물려받고 시작한 인생
+          </p>
+        )}
 
         <div className="mt-4 rounded-2xl border-[3px] border-ink bg-butter/30 p-4">
           <div className="font-pixel text-xl font-bold">{title}</div>
@@ -194,13 +215,42 @@ export function EndingScreen({ character }: { character: Character }) {
         </button>
 
         {canSecondGen && (
-          <button
-            type="button"
-            onClick={continueAsChild}
-            className="toy-btn mt-3 w-full bg-grape text-ink"
-          >
-            👨‍👧 2세대로 이어가기 (유산 {formatMoney(inheritanceAmount(character))})
-          </button>
+          <div className="mt-3 rounded-2xl border-2 border-ink/15 bg-grape/15 p-3">
+            <p className="font-pixel text-[12px] font-bold text-ink/75">
+              👨‍👧 {generation + 1}세대로 이어가기
+            </p>
+            <p className="mt-0.5 font-pixel text-[10px] text-ink/50">
+              유산 {formatMoney(inherited)} · 재능 · 부모의 옷·방 아이템 일부를
+              물려받아요
+            </p>
+            {startHomes.length > 1 && (
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                {startHomes.map((h) => (
+                  <button
+                    key={h.key}
+                    type="button"
+                    onClick={() => setStartHome(h.key)}
+                    aria-pressed={startHome === h.key}
+                    className={`pill transition-colors ${
+                      startHome === h.key
+                        ? "border-ink bg-butter text-ink"
+                        : "bg-white text-ink/55 hover:bg-cream"
+                    }`}
+                  >
+                    {h.emoji} {h.label}
+                    {h.price > 0 && ` · ${formatMoney(h.price)}`}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={continueAsChild}
+              className="toy-btn mt-2.5 w-full bg-grape text-ink"
+            >
+              이어가기
+            </button>
+          </div>
         )}
 
         <button

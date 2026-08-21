@@ -21,7 +21,7 @@ export function SoundToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="pill bg-white py-1.5 text-ink/60 transition-colors hover:bg-cream md:py-0.5"
+      className="tap-44 pill bg-white py-1.5 text-ink/60 transition-colors hover:bg-cream md:py-0.5"
       title={muted ? "효과음 켜기" : "효과음 끄기"}
     >
       {muted ? "🔇" : "🔊"}

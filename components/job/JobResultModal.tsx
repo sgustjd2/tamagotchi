@@ -3,9 +3,11 @@
 import { useGameStore } from "@/lib/store/useGameStore";
 import { COMPANY_TYPES, JOB_FAMILIES } from "@/lib/game/jobs";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
+import { ShareMomentButton } from "@/components/common/ShareMomentButton";
 
 export function JobResultModal() {
   const result = useGameStore((s) => s.jobResult);
+  const character = useGameStore((s) => s.character);
   const ack = useGameStore((s) => s.ackJobResult);
   if (!result) return null;
 
@@ -52,10 +54,22 @@ export function JobResultModal() {
           </p>
         )}
 
+        {result.success && result.job && character && (
+          <ShareMomentButton
+            character={character}
+            moment={{
+              emoji: "💼",
+              title: "합격!",
+              subtitle: `${comp.label} · ${result.job.title}`,
+              lines: [`초봉 ${result.job.salaryManwon.toLocaleString()}만원`],
+            }}
+          />
+        )}
+
         <button
           type="button"
           onClick={ack}
-          className="toy-btn mt-5 w-full bg-coral text-ink"
+          className="toy-btn mt-3 w-full bg-coral text-ink"
         >
           확인
         </button>

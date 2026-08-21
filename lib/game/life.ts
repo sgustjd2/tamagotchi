@@ -1,4 +1,9 @@
-import type { Character, CharacterStatus } from "@/types/character";
+import type {
+  Character,
+  CharacterStatus,
+  LifeStage,
+  ReviewGrade,
+} from "@/types/character";
 import { clamp } from "./clamp";
 import { LIVING_COST, MAX_AGE } from "./constants";
 import { JOB_FAMILIES } from "./jobs";
@@ -70,10 +75,11 @@ export function rollLifeRisk(
   if (rFatal < fatalChance) {
     return { kind: "death", cause: age >= 52 ? "지병" : inc.cause };
   }
-  // 단련된 몸(지구력+근력 평균)은 사고 피해를 줄인다 — 최대 40% 경감
+  // 단련된 몸(지구력+근력 평균 + 체력단련 습관 누적)은 사고 피해를 줄인다 — 최대 40% 경감
   const toughness = Math.min(
     0.4,
-    ((clamp(c.stats.stamina ?? 0, 0, 100) + clamp(c.stats.strength ?? 0, 0, 100)) / 2) * 0.004,
+    ((clamp(c.stats.stamina ?? 0, 0, 100) + clamp(c.stats.strength ?? 0, 0, 100)) / 2) * 0.004 +
+      clamp(c.stats.fitness ?? 0, 0, 100) * 0.001,
   );
   return { kind: "incident", cause: inc.cause, healthHit: Math.round(inc.hit * (1 - toughness)) };
 }
@@ -81,9 +87,42 @@ export function rollLifeRisk(
 /** 자녀 1명당 연간 양육비(만원) */
 export const CHILD_COST = 400;
 
-/** 연간 저축 변화(만원) = 연봉 − 생활비 − 양육비. 취업 전(학생·취준생 포함)에는 면제(0). */
-export function yearlyNet(c: Character): number {
-  if (!c.job) return 0;
+/**
+ * 취업 전 단계별 연간 용돈/알바 수입(만원) — 취업까지 약 2.5시간의 무수입
+ * 공백을 메운다. 연봉(수천만원)·생활비(1200)와 비교해 보수적으로 소액.
+ */
+export const ALLOWANCE_BY_STAGE: Partial<Record<LifeStage, number>> = {
+  elementary: 30, // 용돈
+  middle: 50,
+  high: 70,
+  university: 120, // 용돈 + 과외 알바
+  jobseeker: 300, // 아르바이트
+};
+
+/** 직전 연간 결산 등급에 따른 용돈 가감(±30%) — 성적→용돈 피드백 루프 */
+export const ALLOWANCE_GRADE_MULT: Record<ReviewGrade, number> = {
+  S: 1.3,
+  A: 1.15,
+  B: 1,
+  C: 0.85,
+  D: 0.7,
+};
+
+/**
+ * 연간 저축 변화(만원).
+ * 취업자: 연봉 − 생활비 − 양육비 (생활비는 취업 후부터 청구).
+ * 취업 전: 단계별 용돈/알바 소득 × 그 해 결산 등급 가감 — 학생기에도
+ * 돈이 조금씩 모여 상점(옷 뽑기 5만원 등)을 일찍 체험할 수 있다.
+ */
+export function yearlyNet(
+  c: Character,
+  opts?: { stage?: LifeStage; grade?: ReviewGrade },
+): number {
+  if (!c.job) {
+    const base = opts?.stage ? (ALLOWANCE_BY_STAGE[opts.stage] ?? 0) : 0;
+    if (base === 0) return 0;
+    return Math.round(base * (opts?.grade ? ALLOWANCE_GRADE_MULT[opts.grade] : 1));
+  }
   const childCost = (c.childrenBornAges?.length ?? 0) * CHILD_COST;
   return c.job.salaryManwon - LIVING_COST - childCost;
 }

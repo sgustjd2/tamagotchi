@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { CharacterAppearance, CharacterStatus, Gender } from "@/types/character";
-import { CharacterPreviewCard } from "@/components/character/CharacterPreviewCard";
+import { PreviewDiorama } from "@/components/character/PreviewDiorama";
+import { ScrollWorld } from "@/components/common/ScrollWorld";
 import { MASCOT_COLORS } from "@/lib/game/constants";
 import { DEFAULT_APPEARANCE } from "@/lib/game/sprite/characterStageConfig";
 import { rollAppearance } from "@/lib/game/sprite/characterAppearance";
@@ -57,12 +58,13 @@ export default function CreatePage() {
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-5 text-center">
         <div className="card w-full p-7">
           <div className="mx-auto max-w-[180px]">
-            <CharacterPreviewCard
+            <PreviewDiorama
               lifeStage={existing.lifeStage}
               status={existing.status}
+              color={existing.color}
               gender={existing.gender}
-              jobFamily={existing.job?.family}
               appearance={existing.appearance}
+              items={existing.roomItems}
               width={180}
             />
           </div>
@@ -83,7 +85,7 @@ export default function CreatePage() {
             onClick={() => {
               if (confirm("정말 새로 시작할까요? 지금 캐릭터는 사라져요.")) reset();
             }}
-            className="mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/45 hover:bg-black/5"
+            className="tap-44 mt-3 w-full rounded-xl py-2 text-xs font-semibold text-ink/45 hover:bg-black/5"
           >
             처음부터 새로 시작
           </button>
@@ -93,21 +95,46 @@ export default function CreatePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
-      <Link href="/" className="mb-6 text-sm font-semibold text-ink/50">
+    <main className="mx-auto max-w-md px-5 pb-12 pt-4">
+      <Link href="/" className="text-sm font-semibold text-ink/50">
         ← 홈으로
       </Link>
+      {/* 랜딩과 동일한 스크롤 월드 입장 연출 — 방으로 다가간 뒤 폼이 이어진다 */}
+      <ScrollWorld
+        hint="↓ 스크롤해서 시작"
+        stage={
+          <div className="w-full max-w-[280px]">
+            <PreviewDiorama
+              lifeStage="baby"
+              status={PREVIEW_STATUS}
+              color={color}
+              gender={gender}
+              appearance={appearance}
+              palette={paletteForColor(color, "normal")}
+              width={280}
+            />
+          </div>
+        }
+        content={
+          <>
+            <h1 className="font-pixel text-2xl font-bold">아기 캐릭터 만들기</h1>
+            <p className="mt-1 text-sm text-ink/60">
+              새 인생이 시작될 방이에요. 아래에서 이름과 색을 정해 주세요!
+            </p>
+          </>
+        }
+      />
       <div className="card p-7">
-        <h1 className="font-pixel text-2xl font-bold">아기 캐릭터 만들기</h1>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="text-sm text-ink/60">
           이름과 색을 정해 주세요. 여기서부터 인생이 시작돼요!
         </p>
 
-        {/* 미리보기 */}
+        {/* 미리보기 — 대시보드와 동일한 3D 복셀 방 */}
         <div className="my-5 max-w-[220px] mx-auto">
-          <CharacterPreviewCard
+          <PreviewDiorama
             lifeStage="baby"
             status={PREVIEW_STATUS}
+            color={color}
             gender={gender}
             appearance={appearance}
             palette={paletteForColor(color, "normal")}
@@ -117,7 +144,7 @@ export default function CreatePage() {
         <button
           type="button"
           onClick={() => setAppearance(rollAppearance())}
-          className="mx-auto mb-1 flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-white px-3 py-1.5 font-pixel text-[11px] font-bold text-ink/60 hover:border-ink/40"
+          className="tap-44 mx-auto mb-1 flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-white px-3 py-1.5 font-pixel text-[11px] font-bold text-ink/60 hover:border-ink/40"
         >
           🎲 다른 스타일 뽑기
         </button>

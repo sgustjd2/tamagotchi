@@ -4,14 +4,21 @@
 
 import { describe, expect, it } from "vitest";
 import { createCharacter } from "@/lib/game/character";
+import { housingDef } from "@/lib/game/housing";
 import {
   INHERITANCE_RATE,
+  INHERITED_ITEM_MAX,
+  INHERITED_ITEM_MIN,
+  applyStartingHousing,
   canStartSecondGen,
   inheritanceAmount,
+  inheritedItems,
   inheritedStatBonus,
   nextGenName,
+  pickInherited,
+  startingHousingOptions,
 } from "@/lib/game/legacy";
-import type { Character, CharacterStats } from "@/types/character";
+import type { Character, CharacterStats, WardrobeItemKey } from "@/types/character";
 
 const NOW = 1_700_000_000_000;
 
@@ -78,6 +85,64 @@ describe("inheritedStatBonus", () => {
       ["communication", "creativity", "discipline", "fitness", "intelligence", "memory"].sort(),
     );
     expect(out).not.toHaveProperty("stamina");
+  });
+});
+
+describe("pickInherited / inheritedItems — 유품 상속", () => {
+  it("보유 목록에서 중복 없이 count 개를 뽑는다 (rand 결정적)", () => {
+    const owned = ["a", "b", "c", "d", "e"];
+    const seq = [0.9, 0.1, 0.5];
+    let i = 0;
+    const rand = () => seq[i++ % seq.length];
+    const out = pickInherited(owned, 3, rand);
+    expect(out).toHaveLength(3);
+    expect(new Set(out).size).toBe(3);
+    out.forEach((k) => expect(owned).toContain(k));
+  });
+
+  it("보유분이 count 보다 적으면 있는 만큼만", () => {
+    expect(pickInherited(["a"], 3, () => 0)).toEqual(["a"]);
+    expect(pickInherited([], 3, () => 0)).toEqual([]);
+  });
+
+  it("옷·방 아이템을 각각 2~3개 범위로 물려준다", () => {
+    const parent = makeChar({
+      wardrobe: ["dress", "hoodie", "suit", "hanbok", "crown"] as WardrobeItemKey[],
+      roomItems: [],
+    });
+    const out = inheritedItems(parent, () => 0.5);
+    expect(out.wardrobe.length).toBeGreaterThanOrEqual(INHERITED_ITEM_MIN);
+    expect(out.wardrobe.length).toBeLessThanOrEqual(INHERITED_ITEM_MAX);
+    expect(out.roomItems).toEqual([]);
+  });
+});
+
+describe("startingHousingOptions / applyStartingHousing — 시작 주거", () => {
+  it("유산으로 전액 감당 가능한 선택지만 — 본가는 항상 포함", () => {
+    expect(startingHousingOptions(0).map((h) => h.key)).toEqual(["parents"]);
+    const keys = startingHousingOptions(1000).map((h) => h.key);
+    expect(keys).toContain("parents");
+    expect(keys).toContain("monthlyOneRoom"); // 보증금 1000
+    expect(keys).not.toContain("jeonseOfficetel"); // 3억은 불가
+  });
+
+  it("적용 시 유산에서 전액 차감, 대출 없음", () => {
+    const child = makeChar({ savings: 5000 });
+    const out = applyStartingHousing(child, "monthlyOneRoom");
+    const def = housingDef("monthlyOneRoom");
+    expect(out.savings).toBe(5000 - def.price);
+    expect(out.housing).toEqual({
+      option: "monthlyOneRoom",
+      deposit: def.price,
+      loanBalance: 0,
+      homeValue: 0,
+    });
+  });
+
+  it("감당 불가하거나 본가면 변경 없음", () => {
+    const poor = makeChar({ savings: 100 });
+    expect(applyStartingHousing(poor, "aptOwned")).toBe(poor);
+    expect(applyStartingHousing(poor, "parents")).toBe(poor);
   });
 });
 

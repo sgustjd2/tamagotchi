@@ -16,7 +16,8 @@ const GRADE_LEVERAGE: Record<ReviewGrade, number> = {
 
 /**
  * 협상력(0~1) — 직전 업무평가 등급 + 평판 + 직무역량 + 소통.
- * 번아웃/건강 악화 시 감점. (work.ts 의 reputationScore/competency 재사용)
+ * 자신감이 태도 보정(±10%), 번아웃/건강 악화 시 감점.
+ * (work.ts 의 reputationScore/competency 재사용)
  */
 export function leverage(c: Character): number {
   if (!c.job) return 0;
@@ -26,6 +27,8 @@ export function leverage(c: Character): number {
     0.2 * (reputationScore(c) / 100) +
     0.2 * (competency(c) / 100) +
     0.2 * (ci(c.stats.communication) / 100);
+  // 자신감(칭찬·성취로 관리) — 당당한 태도가 협상력을 ±10% 보정
+  lev *= 1 + ((ci(c.status.confidence) - 50) / 100) * 0.2;
   if (c.status.burnout > 80 || c.status.health < 30) lev *= 0.7;
   return clamp(lev, 0, 1);
 }

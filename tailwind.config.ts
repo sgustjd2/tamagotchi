@@ -25,6 +25,16 @@ const config: Config = {
           warn: "#E0A428",
           bad: "#D9472E",
         },
+        // -------------------------------------------------------------------
+        // 시맨틱 토큰(최소 단계) — 새 코드는 의미로 색을 고른다.
+        // surface: text-ink 를 얹는 배경(ink 대비 7:1 이상)
+        // strong : cream 배경 위 글자·아이콘용 진한 색(대비 4.5:1 이상)
+        // 대비 수치는 lib/__tests__/semanticTokens.test.ts 가 잠근다.
+        // -------------------------------------------------------------------
+        primary: { surface: "#FF9A8B", strong: "#B4432F" },
+        success: { surface: "#A8E6CF", strong: "#1E7A48" },
+        warning: { surface: "#FFE3A3", strong: "#8A5B00" },
+        danger: { surface: "#FFC9BF", strong: "#B4331D" },
       },
       fontFamily: {
         sans: [

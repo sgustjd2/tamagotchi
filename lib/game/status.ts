@@ -95,17 +95,20 @@ export function applyDecay(c: Character, now: number): Character {
 /**
  * 공부/업무 보상 효율 배수.
  * hunger<30 -> 0.5, energy<30 -> 0.6, mood<30 -> 0.7, cleanliness<25 -> 0.85,
- * focus>80 -> 1.2. 가장 불리한 페널티를 적용하고 focus 보너스를 곱한다.
+ * sleepQuality<25 -> 0.85. 가장 불리한 페널티 하나를 적용하고,
+ * focus>80(×1.2)·sleepQuality>80(×1.1) 보너스를 곱한다.
  */
 export function learningEfficiency(c: Character): number {
-  const { hunger, energy, mood, focus, cleanliness } = c.status;
+  const { hunger, energy, mood, focus, cleanliness, sleepQuality } = c.status;
   let mult = 1;
   if (hunger < 30) mult = Math.min(mult, 0.5);
   if (energy < 30) mult = Math.min(mult, 0.6);
   if (mood < 30) mult = Math.min(mult, 0.7);
   if (cleanliness < 25) mult = Math.min(mult, 0.85);
+  if (sleepQuality < 25) mult = Math.min(mult, 0.85);
   const focusBonus = focus > 80 ? 1.2 : 1;
-  return round2(mult * focusBonus);
+  const sleepBonus = sleepQuality > 80 ? 1.1 : 1;
+  return round2(mult * focusBonus * sleepBonus);
 }
 
 /** 효율이 100% 미만일 때 사용자에게 보여줄 사유 목록 */
@@ -115,6 +118,7 @@ export function efficiencyReasons(c: Character): string[] {
   if (c.status.energy < 30) reasons.push("체력 부족");
   if (c.status.mood < 30) reasons.push("기분 저하");
   if (c.status.cleanliness < 25) reasons.push("위생 불량");
+  if (c.status.sleepQuality < 25) reasons.push("수면 부족");
   return reasons;
 }
 

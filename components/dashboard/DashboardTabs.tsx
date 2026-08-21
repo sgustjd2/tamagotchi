@@ -4,8 +4,10 @@ import { useEffect, useRef } from "react";
 
 import type { Character } from "@/types/character";
 import { cn } from "@/lib/utils";
+import { isActionUnlocked } from "@/lib/game/gating";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
 import { StatBar } from "@/components/common/StatBar";
+import { FirstVisitGuide } from "@/components/common/FirstVisitGuide";
 import { ActionGrid } from "@/components/actions/ActionGrid";
 import { FoodSelector } from "@/components/actions/FoodSelector";
 import { StudyCard } from "@/components/actions/StudyCard";
@@ -59,6 +61,8 @@ export function DashboardTabs({
   // visibilitychange 추적(hiddenMs)이 탭 전환으로 끊기지 않아야 하기 때문
   const panelCls = (key: TabKey) =>
     cn("flex-col gap-3", tab === key ? "flex" : "hidden");
+  // 공부가 잠긴 단계(아기~유아)에선 잠금 카드가 최상단을 차지하지 않게 하단으로
+  const studyLocked = !isActionUnlocked("study", character.lifeStage);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -87,6 +91,7 @@ export function DashboardTabs({
 
       <div ref={scrollRef} className="scroll-hide min-h-0 flex-1 overflow-y-auto pb-2">
         <div className={panelCls("care")}>
+          <FirstVisitGuide />
           {/* 모바일 전용 핵심 컨디션 4종 — 데스크톱은 왼쪽 캐릭터 패널이 담당 */}
           <div className="card p-3 md:hidden">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -96,12 +101,13 @@ export function DashboardTabs({
               <StatBar label="건강" value={character.status.health} />
             </div>
           </div>
-          <StudyCard character={character} now={now} />
+          {!studyLocked && <StudyCard character={character} now={now} />}
           <div className="card p-4">
             <h3 className="mb-3 font-pixel text-sm font-bold text-ink/80">식사</h3>
             <FoodSelector character={character} now={now} />
           </div>
           <ActionGrid character={character} now={now} />
+          {studyLocked && <StudyCard character={character} now={now} />}
         </div>
         <div className={panelCls("status")}>
           {/* 모바일 전용 전체 컨디션 — 데스크톱 왼쪽 패널과 동일 구성 */}
