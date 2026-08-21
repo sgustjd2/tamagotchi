@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { CharacterAppearance, CharacterStatus, Gender } from "@/types/character";
-import { CharacterPreviewCard } from "@/components/character/CharacterPreviewCard";
+import { PreviewDiorama } from "@/components/character/PreviewDiorama";
 import { ScrollWorld } from "@/components/common/ScrollWorld";
 import { MASCOT_COLORS } from "@/lib/game/constants";
 import { DEFAULT_APPEARANCE } from "@/lib/game/sprite/characterStageConfig";
@@ -58,12 +58,13 @@ export default function CreatePage() {
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-5 text-center">
         <div className="card w-full p-7">
           <div className="mx-auto max-w-[180px]">
-            <CharacterPreviewCard
+            <PreviewDiorama
               lifeStage={existing.lifeStage}
               status={existing.status}
+              color={existing.color}
               gender={existing.gender}
-              jobFamily={existing.job?.family}
               appearance={existing.appearance}
+              items={existing.roomItems}
               width={180}
             />
           </div>
@@ -103,9 +104,10 @@ export default function CreatePage() {
         hint="↓ 스크롤해서 시작"
         stage={
           <div className="w-full max-w-[280px]">
-            <CharacterPreviewCard
+            <PreviewDiorama
               lifeStage="baby"
               status={PREVIEW_STATUS}
+              color={color}
               gender={gender}
               appearance={appearance}
               palette={paletteForColor(color, "normal")}
@@ -127,11 +129,12 @@ export default function CreatePage() {
           이름과 색을 정해 주세요. 여기서부터 인생이 시작돼요!
         </p>
 
-        {/* 미리보기 */}
+        {/* 미리보기 — 대시보드와 동일한 3D 복셀 방 */}
         <div className="my-5 max-w-[220px] mx-auto">
-          <CharacterPreviewCard
+          <PreviewDiorama
             lifeStage="baby"
             status={PREVIEW_STATUS}
+            color={color}
             gender={gender}
             appearance={appearance}
             palette={paletteForColor(color, "normal")}

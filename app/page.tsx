@@ -1,6 +1,6 @@
 import type { CharacterStatus } from "@/types/character";
 import { StartCta } from "@/components/common/StartCta";
-import { CharacterPreviewCard } from "@/components/character/CharacterPreviewCard";
+import { PreviewDiorama } from "@/components/character/PreviewDiorama";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
 import { ScrollWorld } from "@/components/common/ScrollWorld";
 import { GAME_YEAR_MS, NEGLECT_DEATH_MS } from "@/lib/game/constants";
@@ -33,7 +33,7 @@ export default function LandingPage() {
       <ScrollWorld
         stage={
           <div className="w-full max-w-[280px] sm:max-w-[300px]">
-            <CharacterPreviewCard lifeStage="middle" status={HERO_STATUS} width={280} />
+            <PreviewDiorama lifeStage="middle" status={HERO_STATUS} width={280} />
           </div>
         }
         content={
