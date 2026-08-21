@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import type { CharacterAppearance, CharacterStatus, Gender } from "@/types/character";
 import { PreviewDiorama } from "@/components/character/PreviewDiorama";
-import { ScrollWorld } from "@/components/common/ScrollWorld";
+import { GameLogo } from "@/components/common/GameLogo";
 import { MASCOT_COLORS } from "@/lib/game/constants";
 import { DEFAULT_APPEARANCE } from "@/lib/game/sprite/characterStageConfig";
 import { rollAppearance } from "@/lib/game/sprite/characterAppearance";
@@ -95,37 +95,16 @@ export default function CreatePage() {
   }
 
   return (
-    <main className="mx-auto max-w-md px-5 pb-12 pt-4">
-      <Link href="/" className="text-sm font-semibold text-ink/50">
-        ← 홈으로
-      </Link>
-      {/* 랜딩과 동일한 스크롤 월드 입장 연출 — 방으로 다가간 뒤 폼이 이어진다 */}
-      <ScrollWorld
-        hint="↓ 스크롤해서 시작"
-        stage={
-          <div className="w-full max-w-[280px]">
-            <PreviewDiorama
-              lifeStage="baby"
-              status={PREVIEW_STATUS}
-              color={color}
-              gender={gender}
-              appearance={appearance}
-              palette={paletteForColor(color, "normal")}
-              width={280}
-            />
-          </div>
-        }
-        content={
-          <>
-            <h1 className="font-pixel text-2xl font-bold">아기 캐릭터 만들기</h1>
-            <p className="mt-1 text-sm text-ink/60">
-              새 인생이 시작될 방이에요. 아래에서 이름과 색을 정해 주세요!
-            </p>
-          </>
-        }
-      />
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
+      <div className="mb-6 flex items-center justify-between">
+        <Link href="/" className="text-sm font-semibold text-ink/50">
+          ← 홈으로
+        </Link>
+        <GameLogo as="span" className="text-xl" />
+      </div>
       <div className="card p-7">
-        <p className="text-sm text-ink/60">
+        <h1 className="font-pixel text-2xl font-bold">아기 캐릭터 만들기</h1>
+        <p className="mt-1 text-sm text-ink/60">
           이름과 색을 정해 주세요. 여기서부터 인생이 시작돼요!
         </p>
 

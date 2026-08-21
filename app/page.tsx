@@ -2,7 +2,7 @@ import type { CharacterStatus } from "@/types/character";
 import { StartCta } from "@/components/common/StartCta";
 import { PreviewDiorama } from "@/components/character/PreviewDiorama";
 import { PixelIcon } from "@/components/pixel/PixelIcon";
-import { ScrollWorld } from "@/components/common/ScrollWorld";
+import { GameLogo } from "@/components/common/GameLogo";
 import { GAME_YEAR_MS, NEGLECT_DEATH_MS } from "@/lib/game/constants";
 const HERO_STATUS: CharacterStatus = {
   hunger: 82,
@@ -30,36 +30,38 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-5 py-12">
-      <ScrollWorld
-        stage={
-          <div className="w-full max-w-[280px] sm:max-w-[300px]">
+      {/* 게임 타이틀 화면 — 로고·기기 프레임 속 3D 방·시작 버튼이 한 화면에 완성 */}
+      <section className="flex min-h-[calc(100dvh-6rem)] w-full flex-col items-center justify-center text-center">
+        <span className="pill -rotate-2 bg-white text-ink/70">
+          한국형 인생·커리어 다마고치
+        </span>
+        <div className="mt-4 animate-pop">
+          <GameLogo className="text-5xl sm:text-7xl" />
+        </div>
+
+        {/* 다마고치 기기 프레임 속 3D 방 — 빈 배경에 상자만 뜨지 않게 셸 언어로 감싼다 */}
+        <div className="mt-7 rounded-[2.25rem_2.25rem_1.75rem_1.75rem] border-[3px] border-ink bg-gradient-to-b from-blush via-[#FFD3DC] to-cream p-2.5 shadow-[5px_6px_0_0_rgba(46,39,34,0.16)]">
+          <div className="w-[240px] sm:w-[280px]">
             <PreviewDiorama lifeStage="middle" status={HERO_STATUS} width={280} />
           </div>
-        }
-        content={
-          <>
-            <span className="pill mb-4 bg-white text-ink/70">
-              한국형 인생·커리어 다마고치
-            </span>
-            <h1 className="font-pixel text-4xl font-bold sm:text-5xl">LifeGotchi</h1>
-            <p className="mt-4 max-w-xl text-base text-ink/65 sm:text-lg">
-              아기부터 키워서 공부·건강관리·자기개발을 거쳐{" "}
-              <b>취업, 업무평가, 연봉협상, 승진까지</b>. 페이지를 켜두고 주기적으로
-              직접 돌봐야 성장하는 인생 육성 웹앱이에요.
-            </p>
-            <div className="mt-6">
-              <StartCta />
-            </div>
-            <p className="mt-3 font-pixel text-xs text-ink/45">
-              게임 1년 = 현실 {GAME_YEAR_MS / 60000}분 ·{" "}
-              {NEGLECT_DEATH_MS / 3_600_000}시간 이상 방치하면 떠나보낼 수 있어요
-            </p>
-            <p className="mt-1 font-pixel text-xs text-ink/45">
-              회원가입 없이 바로 시작 · 개인정보를 받지 않아요
-            </p>
-          </>
-        }
-      />
+        </div>
+
+        <p className="mt-6 max-w-xl text-base text-ink/65 sm:text-lg">
+          아기부터 키워서 공부·건강관리·자기개발을 거쳐{" "}
+          <b>취업, 업무평가, 연봉협상, 승진까지</b>. 페이지를 켜두고 주기적으로
+          직접 돌봐야 성장하는 인생 육성 웹앱이에요.
+        </p>
+        <div className="mt-6">
+          <StartCta />
+        </div>
+        <p className="mt-3 font-pixel text-xs text-ink/45">
+          게임 1년 = 현실 {GAME_YEAR_MS / 60000}분 ·{" "}
+          {NEGLECT_DEATH_MS / 3_600_000}시간 이상 방치하면 떠나보낼 수 있어요
+        </p>
+        <p className="mt-1 font-pixel text-xs text-ink/45">
+          회원가입 없이 바로 시작 · 개인정보를 받지 않아요
+        </p>
+      </section>
 
       <section className="mt-14 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((f, i) => (
