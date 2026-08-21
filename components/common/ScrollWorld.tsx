@@ -67,7 +67,9 @@ export function ScrollWorld({
       >
         <div
           style={active ? { transform: `scale(${scale})` } : undefined}
-          className="mb-5 will-change-transform"
+          // w-full 필수: 3D 방(aspect-square w-full)은 부모 폭이 auto 면 0으로
+          // 수축해 점만 남는다(2D 방은 고정 px 라 무관)
+          className="mb-5 flex w-full justify-center will-change-transform"
         >
           {stage}
         </div>
